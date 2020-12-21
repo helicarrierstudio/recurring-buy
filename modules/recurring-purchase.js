@@ -188,8 +188,7 @@ const buyViaInstant = async () => {
 };
 
 
-
-(async () => {
+module.exports = async () => {
 
     const shouldPurchaseToday = await checkIfShouldPurchaseToday();
 
@@ -206,5 +205,4 @@ const buyViaInstant = async () => {
         addPurchaseToSummary(result);
     }
 
-})();
-
+};

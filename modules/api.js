@@ -1,6 +1,6 @@
 const graphqlRequest = require('graphql-request');
 
-// const secrets = require('./secrets');
+// const secrets = require('../secrets');
 const secrets = {
     public: process.env.BUYCOINS_API_PUBLIC,
     secret: process.env.BUYCOINS_API_SECRET,
