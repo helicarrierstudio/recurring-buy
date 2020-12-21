@@ -1,14 +1,14 @@
 const fs = require('fs');
 const api = require('./api');
 
-const SETTINGS = {
+const CONFIG = {
     AMOUNT: process.env.CONFIG_AMOUNT || 12000,
     FREQUENCY: process.env.CONFIG_FREQUENCY || 'DAILY', // DAILY, WEEKLY_[1-7], MONTHLY_[1-29]
 };
 
 const writeSummaryFile = (data) => {
     return new Promise((resolve) => {
-        fs.writeFile('summary.json', JSON.stringify(data), {encoding: 'utf-8'}, function(err,data){
+        fs.writeFile('../public/summary.json', JSON.stringify(data), {encoding: 'utf-8'}, function(err,data){
             if (!err) {
                 resolve(data)
             } else {
@@ -21,7 +21,7 @@ const writeSummaryFile = (data) => {
 
 const readSummaryFile = () => {
     return new Promise((resolve) => {
-        fs.readFile('summary.json', {encoding: 'utf-8'}, function(err,data){
+        fs.readFile('../public/summary.json', {encoding: 'utf-8'}, function(err,data){
             if (!err) {
                 resolve( JSON.parse(data) )
             } else {
@@ -69,7 +69,7 @@ const addErrorToSummary = async (data) => {
 const checkIfShouldPurchaseToday = async () => {
 
     const today = new Date();
-    const frequency_period = SETTINGS.FREQUENCY.split('_')[0];
+    const frequency_period = CONFIG.FREQUENCY.split('_')[0];
 
     let shouldPurchaseToday = false;
 
@@ -79,13 +79,13 @@ const checkIfShouldPurchaseToday = async () => {
             break;
 
         case 'WEEKLY':
-            const frequency_day = parseInt(SETTINGS.FREQUENCY.split('_')[1]);
+            const frequency_day = parseInt(CONFIG.FREQUENCY.split('_')[1]);
             const day = today.getDay();
             shouldPurchaseToday = frequency_day === day;
             break;
 
         case 'MONTHLY':
-            const frequency_date = parseInt(SETTINGS.FREQUENCY.split('_')[1]);
+            const frequency_date = parseInt(CONFIG.FREQUENCY.split('_')[1]);
             const date = today.getDate();
             shouldPurchaseToday = frequency_date === date;
             break;
@@ -119,7 +119,7 @@ const buyViaMarket = async () => {
 
         const p = parseFloat(marketOrder.pricePerCoin);
         const maxAmount = parseFloat(marketOrder.coinAmount);
-        const a = SETTINGS.AMOUNT / p;
+        const a = CONFIG.AMOUNT / p;
 
         if (a <= maxAmount) {
             price = p;
@@ -163,7 +163,7 @@ const buyViaInstant = async () => {
 
     const price = parseFloat(instantPrice.buyPricePerCoin);
     const minAmount = parseFloat(instantPrice.minBuy);
-    const amountToBuy = parseFloat(SETTINGS.AMOUNT) / price;
+    const amountToBuy = parseFloat(CONFIG.AMOUNT) / price;
     console.log(amountToBuy);
 
     if (amountToBuy <= minAmount) return {

@@ -1,0 +1,36 @@
+html {
+    font-size: 62.5%;
+}
+body {
+    font-size: 1.6rem;
+    line-height: 1.6;
+    font-family: 'Inconsolata', monospace;
+    text-align: center;
+    color: rgb(50,50,50);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1,
+a {
+    color: #000;
+    font-weight: 700;
+}
+
+main {
+    width: 90%;
+    max-width: 400px;
+}
+
+.img {
+    display: inline-block;
+    width: 100%;
+    max-width: 200px;
+}
+
+img {
+    width: 100%;
+}

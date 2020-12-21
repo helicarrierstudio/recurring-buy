@@ -1,7 +1,5 @@
 const recurringPurchase = require('./modules/recurring-purchase');
 
-
-
 (async () => {
 
 
@@ -10,4 +8,3 @@ const recurringPurchase = require('./modules/recurring-purchase');
     
 
 })();
-
