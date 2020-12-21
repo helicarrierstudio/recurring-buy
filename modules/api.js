@@ -99,6 +99,13 @@ module.exports = {
             mutation postMarketOrder($cryptocurrency: Cryptocurrency, $orderSide: OrderSide!, $coinAmount: BigDecimal!) {
                 postMarketOrder(cryptocurrency: $cryptocurrency, orderSide: $orderSide, coinAmount: $coinAmount) {
                     id
+                    createdAt
+                    cryptocurrency
+                    coinAmount
+                    pricePerCoin
+                    priceType
+                    staticPrice
+                    dynamicExchangeRate
                 }
             }
         `;
@@ -128,17 +135,13 @@ module.exports = {
                 buy(cryptocurrency: $cryptocurrency, 
                     price: $price, 
                     coin_amount: $coin_amount) {
-
                     id
                     createdAt
                     cryptocurrency
-                    filledCoinAmount
+                    totalCoinAmount
                     price {
                         buyPricePerCoin
                     }
-                    side
-                    totalCoinAmount
-
                 }
             }
         `;

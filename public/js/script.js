@@ -37,11 +37,14 @@ fetch("/summary.json")
             if (item.instantOrder) {
                 amount = item.instantOrder.totalCoinAmount;
                 price = item.instantOrder.price.buyPricePerCoin;
-                cost = parseFloat(amount) * parseFloat(price);
-
-                totalAmount += parseFloat(amount);
-                totalCost += parseFloat(cost);
+            } else if (item.marketOrder) {
+                amount = item.marketOrder.coinAmount;
+                price = item.marketOrder.pricePerCoin;
             }
+
+            cost = parseFloat(amount) * parseFloat(price);
+            totalAmount += parseFloat(amount);
+            totalCost += parseFloat(cost);
 
             tbody += `
             <tr>

@@ -141,10 +141,11 @@ const buyViaMarket = async () => {
     }
 
     try {
-        const postMarketOrder = await api.postMarketOrder(amountToBuy);
-        console.log(postMarketOrder)
+        const marketOrder = await api.postMarketOrder(amountToBuy);
+        console.log(marketOrder)
         return {
-            market_order: postMarketOrder,
+            method: "market",
+            marketOrder
         }
 
     } catch (error) {
