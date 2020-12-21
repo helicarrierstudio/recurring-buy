@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const api = require('./api');
 
 const CONFIG = {
@@ -6,9 +7,11 @@ const CONFIG = {
     FREQUENCY: process.env.CONFIG_FREQUENCY || 'DAILY', // DAILY, WEEKLY_[1-7], MONTHLY_[1-29]
 };
 
+const summaryFilePath = path.join(__dirname + '/../public/summary.json');
+
 const writeSummaryFile = (data) => {
     return new Promise((resolve) => {
-        fs.writeFile('../public/summary.json', JSON.stringify(data), {encoding: 'utf-8'}, function(err,data){
+        fs.writeFile(summaryFilePath, JSON.stringify(data), {encoding: 'utf-8'}, function(err,data){
             if (!err) {
                 resolve(data)
             } else {
@@ -21,7 +24,7 @@ const writeSummaryFile = (data) => {
 
 const readSummaryFile = () => {
     return new Promise((resolve) => {
-        fs.readFile('../public/summary.json', {encoding: 'utf-8'}, function(err,data){
+        fs.readFile(summaryFilePath, {encoding: 'utf-8'}, function(err,data){
             if (!err) {
                 resolve( JSON.parse(data) )
             } else {
@@ -42,29 +45,31 @@ const getTodaysKey = () => {
 };
 
 const addPurchaseToSummary = async (data) => {
-    data.timestamp = new Date().getMilliseconds();
+    data.timestamp = Date.now();
 
     const summary = await readSummaryFile();
     const key = getTodaysKey();
 
-    if (!summary.errors[key]) summary.errors[key] = [];
+    if (!summary[key]) summary[key] = {};
 
-    summary.errors[key].push(data);
+    summary[key].purchase = data;
 
     writeSummaryFile(summary);
 };
 
 const addErrorToSummary = async (data) => {
-    data.timestamp = new Date().getMilliseconds();
+    data.timestamp = Date.now();
 
     const summary = await readSummaryFile();
     const key = getTodaysKey();
 
-    summary.purchases[key] = data;
+    if (!summary[key]) summary[key] = {};
+    if (!summary[key].errors) summary[key].errors = [];
+
+    summary[key].errors.push(data);
 
     writeSummaryFile(summary);
 };
-
 
 const checkIfShouldPurchaseToday = async () => {
 
@@ -93,10 +98,12 @@ const checkIfShouldPurchaseToday = async () => {
 
     if (shouldPurchaseToday) {
         const summary = await readSummaryFile();
-        shouldPurchaseToday = !summary.purchases[getTodaysKey()];
+        const key = getTodaysKey();
+
+        shouldPurchaseToday = !(summary[key] && summary[key].purchase);
     }
 
-    console.log("shouldPurchaseToday: ", shouldPurchaseToday)
+    console.log("shouldPurchaseToday:", shouldPurchaseToday)
     return shouldPurchaseToday;
 };
 

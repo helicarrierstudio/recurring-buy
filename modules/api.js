@@ -1,10 +1,13 @@
 const graphqlRequest = require('graphql-request');
 
-// const secrets = require('../secrets');
-const secrets = {
+let secrets = {
     public: process.env.BUYCOINS_API_PUBLIC,
     secret: process.env.BUYCOINS_API_SECRET,
 };
+
+if (!process.env.BUYCOINS_API_PUBLIC) {
+    secrets = require('../secrets');
+} 
 
 const endpoint = 'https://backend.buycoins.tech/api/graphql';
 const authorization = 'Basic ' + Buffer.from(secrets.public  + ':' + secrets.secret).toString('base64');
@@ -134,7 +137,6 @@ module.exports = {
                         buyPricePerCoin
                     }
                     side
-                    status
                     totalCoinAmount
 
                 }
