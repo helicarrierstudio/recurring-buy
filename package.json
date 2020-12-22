@@ -1,5 +1,5 @@
 {
-  "name": "buycoins-daily-buy",
+  "name": "buycoins-recurring-buy",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
