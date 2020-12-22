@@ -1,2 +1,2 @@
-# Buycoins Recurring Purchase
+# Buycoins Recurring Buy
 

@@ -31,7 +31,7 @@ app.get('/api/setup', (req, res) => {
 
         console.log(coinAmountForNairaSpend)
 
-        console.log(`With NGN${nairaSpendPerMonth}, you can purchase ${coinAmountForNairaSpend} BTC each month`);
+        console.log(`With NGN${nairaSpendPerMonth}, you can buy ${coinAmountForNairaSpend} BTC each month`);
 
         const daily = coinAmountForNairaSpend / 30;
         const weekly = coinAmountForNairaSpend / 4;
@@ -49,9 +49,9 @@ app.get('/api/setup', (req, res) => {
         let option = dailyAvailable ? 'daily' : weeklyAvailable ? 'weekly' : monthlyAvailable ? 'monthly' : null;
 
         if (option) {
-            console.log(`Based on the current minimum purchase of ${minBuy} BTC, we recommend you go with a ${option} buy`);
+            console.log(`Based on the current minimum buy of ${minBuy} BTC, we recommend you go with a ${option} buy`);
         } else {
-            console.log(`Based on the current minimum purchase of ${minBuy} BTC, the amount you've chosen is too small`);
+            console.log(`Based on the current minimum buy of ${minBuy} BTC, the amount you've chosen is too small`);
         }
     };
 

@@ -1,10 +1,5 @@
-const recurringPurchase = require('./modules/recurring-purchase');
+const recurringBuy = require('./modules/recurring-buy');
 
 (async () => {
-
-
-    recurringPurchase();
-
-    
-
+    recurringBuy();
 })();

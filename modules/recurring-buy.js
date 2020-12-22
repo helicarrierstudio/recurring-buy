@@ -54,6 +54,8 @@ const addPurchaseToSummary = async (data) => {
 
     summary[key].purchase = data;
 
+    console.log(data);
+
     writeSummaryFile(summary);
 };
 
@@ -68,43 +70,45 @@ const addErrorToSummary = async (data) => {
 
     summary[key].errors.push(data);
 
+    console.log(data);
+
     writeSummaryFile(summary);
 };
 
-const checkIfShouldPurchaseToday = async () => {
+const checkIfShouldBuyToday = async () => {
 
     const today = new Date();
     const frequency_period = CONFIG.FREQUENCY.split('_')[0];
 
-    let shouldPurchaseToday = false;
+    let shouldBuyToday = false;
 
     switch (frequency_period) {
         case 'DAILY':
-            shouldPurchaseToday = true;
+            shouldBuyToday = true;
             break;
 
         case 'WEEKLY':
             const frequency_day = parseInt(CONFIG.FREQUENCY.split('_')[1]);
             const day = today.getDay();
-            shouldPurchaseToday = frequency_day === day;
+            shouldBuyToday = frequency_day === day;
             break;
 
         case 'MONTHLY':
             const frequency_date = parseInt(CONFIG.FREQUENCY.split('_')[1]);
             const date = today.getDate();
-            shouldPurchaseToday = frequency_date === date;
+            shouldBuyToday = frequency_date === date;
             break;
     }
 
-    if (shouldPurchaseToday) {
+    if (shouldBuyToday) {
         const summary = await readSummaryFile();
         const key = getTodaysKey();
 
-        shouldPurchaseToday = !(summary[key] && summary[key].purchase);
+        shouldBuyToday = !(summary[key] && summary[key].purchase);
     }
 
-    console.log("shouldPurchaseToday:", shouldPurchaseToday)
-    return shouldPurchaseToday;
+    console.log("Should Buy Today:", shouldBuyToday)
+    return shouldBuyToday;
 };
 
 
@@ -142,7 +146,6 @@ const buyViaMarket = async () => {
 
     try {
         const marketOrder = await api.postMarketOrder(amountToBuy);
-        console.log(marketOrder)
         return {
             method: "market",
             marketOrder
@@ -167,12 +170,9 @@ const buyViaInstant = async () => {
         error: "no_instant_price"
     }
 
-    console.log(instantPrice);
-
     const price = parseFloat(instantPrice.buyPricePerCoin);
     const minAmount = parseFloat(instantPrice.minBuy);
     const amountToBuy = parseFloat(CONFIG.AMOUNT) / price;
-    console.log(amountToBuy);
 
     if (amountToBuy <= minAmount) return {
         error: "btc_amount_too_small"
@@ -180,7 +180,6 @@ const buyViaInstant = async () => {
 
     try {
         const instantOrder = await api.placeInstantOrder(amountToBuy, instantPrice.id);
-        console.log(instantOrder);
         return {
             method: "instant",
             instantOrder
@@ -198,9 +197,7 @@ const buyViaInstant = async () => {
 
 module.exports = async () => {
 
-    const shouldPurchaseToday = await checkIfShouldPurchaseToday();
-
-    if (!shouldPurchaseToday) return console.log("not buying today");
+    if ( !(await checkIfShouldBuyToday()) ) return;
 
     let result = await buyViaMarket();
 
