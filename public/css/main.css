@@ -47,6 +47,14 @@ a {
     color: #966FDB;
 }
 
+code {
+    background-color: #fff;
+    border: 1px solid #ececec;
+    padding: 0 0.3em;
+
+
+}
+
 /* Layout */
 
 .container {

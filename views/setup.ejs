@@ -43,11 +43,11 @@
         <section>
             <h2>Steps</h2>
 
-            <details>
+            <details open>
                 <summary>1. Get access to the BuyCoins API</summary>
                 <div>
                     <p>You'll need access to the <a href="http://developers.buycoins.africa/">BuyCoins API</a> in order to make automatic purchases. To apply for access, send an email to <a href="support@buycoins.africa">support@buycoins.africa</a>.</p>
-                    <p>Once you have access, go to the <a href="https://buycoins.africa/settings/api">API Settings</a> page and copy your public and secret keys. These keys will be used as the <strong>BUYCOINS_API_PUBLIC</strong> and <strong>BUYCOINS_API_PUBLIC</strong> environment variables on Heroku.</p>
+                    <p>Once you have access, go to the <a href="https://buycoins.africa/settings/api">API Settings</a> page and copy your public and secret keys. These keys will be used as the <code>BUYCOINS_API_PUBLIC</code> and <code>BUYCOINS_API_SECRET</code> environment variables on Heroku.</p>
                 </div>
             </details>
 
@@ -55,7 +55,7 @@
                 <summary>2. Create a Fauna database</summary>
                 <div>
                     <p>Sign up for an account with <a href="https://fauna.com">Fauna DB</a> and create a database (you can name it anything you want).</p>
-                    <p>Under your database security settings, create a new Key with the <strong>admin</strong> role and copy your generated secret key. This key will be used as the <strong>FAUNA_DB_SECRET</strong> environment variable on Heroku.</p>
+                    <p>Under your database security settings, create a new Key with the <strong>admin</strong> role and copy your generated secret key. This key will be used as the <code>FAUNA_DB_SECRET</code> environment variable on Heroku.</p>
                     <p><img src="/images/fauna-db.png" alt=""></p>
                 </div>
             </details>
@@ -65,15 +65,15 @@
                 <div>
                     <p>You can specify how often and how much you want to buy Bitcoin by setting the following environment variables:</p>
                     <p>
-                        <strong>BUY_FREQUENCY</strong><br>
+                        <code>BUY_FREQUENCY</code><br>
                         <ul>
-                            <li><em>DAILY</em> - if you want to buy every day</li>
-                            <li><em>WEEKLY_[1-7]</em> - if you want to buy once a week. e.g. WEEKLY_1 to buy every Monday</li>
-                            <li><em>MONTHLY_[1-29]</em> - if you want to buy once a month. e.g. MONTHLY_5 to buy on the 5th day of each month</li>
+                            <li><code>DAILY</code> - if you want to buy every day</li>
+                            <li><code>WEEKLY_[1-7]</code> - if you want to buy once a week. e.g. WEEKLY_1 to buy every Monday</li>
+                            <li><code>MONTHLY_[1-29]</code> - if you want to buy once a month. e.g. MONTHLY_5 to buy on the 5th day of each month</li>
                         </ul>
                     </p>
                     <p>
-                        <strong>BUY_AMOUNT</strong><br>
+                        <code>BUY_AMOUNT</code><br>
                         The amount you want to purchase each time.
                     </p>
                     <p>If you need help choosing... </p>
@@ -107,7 +107,7 @@
                 <div>
                     <p>Under your Heroku project "Resources" tab, add the Heroku Scheduler add-on.</p>
                     <p><img src="/images/heroku-add-on.png" alt=""></p>
-                    <p>Next, set the scheduler to run once every day at a time of your choosing. Make sure it's set to every day, regardless of your BUY_FREQUENCY. Set the command to <strong>recurringBuy</strong>.</p>
+                    <p>Next, set the scheduler to run once every day at a time of your choosing. Make sure it's set to every day, regardless of your <code>BUY_FREQUENCY</code>. Set the command to <strong>recurringBuy</strong>.</p>
                     <p><img src="/images/heroku-scheduler.png" alt=""></p>
                 </div>
             </details>
