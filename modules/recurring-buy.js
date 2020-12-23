@@ -2,8 +2,8 @@ const api = require('./api');
 const db = require('./db');
 
 const CONFIG = {
-    AMOUNT: process.env.CONFIG_AMOUNT || 12000,
-    FREQUENCY: process.env.CONFIG_FREQUENCY || 'DAILY', // DAILY, WEEKLY_[1-7], MONTHLY_[1-29]
+    AMOUNT: process.env.BUY_AMOUNT || 12000,
+    FREQUENCY: process.env.BUY_FREQUENCY || 'DAILY', // DAILY, WEEKLY_[1-7], MONTHLY_[1-29]
 };
 
 const getTodaysDate = () => {

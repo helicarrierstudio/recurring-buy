@@ -113,7 +113,10 @@ const getAllSummaries = () => {
             q.Paginate(
                 q.Match(
                     q.Index(DB_INDEX_ALL_SUMMARIES)
-                )
+                ),
+                {
+                    size: 99999
+                }
             )
         )
         .then((ret) => ret.data)

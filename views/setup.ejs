@@ -35,6 +35,7 @@
             <ul>
                 <li>An account on  <a href="https://buycoins.africa/">BuyCoins</a>, with access to the API (see below)</li>
                 <li>A <a href="https://heroku.com">Heroku</a> account</li>
+                <li>A <a href="https://fauna.com">Fauna DB</a> account</li>
                 <li>A <a href="https://github.com">GitHub</a> account (optional, but will make it easier to copy this project)</li>
             </ul>
         </section>
@@ -45,22 +46,69 @@
             <details>
                 <summary>1. Get access to the BuyCoins API</summary>
                 <div>
-                    <p>You'll need to have access to the BuyCoins API in order to make automatic purchases. To apply for access, send an email to <a href="support@buycoins.africa">support@buycoins.africa</a></p>
-                    <p>Once you have access, go to the <a href="https://buycoins.africa/settings/api">API Settings</a> page and copy your public and secret keys.</p>
+                    <p>You'll need access to the <a href="http://developers.buycoins.africa/">BuyCoins API</a> in order to make automatic purchases. To apply for access, send an email to <a href="support@buycoins.africa">support@buycoins.africa</a>.</p>
+                    <p>Once you have access, go to the <a href="https://buycoins.africa/settings/api">API Settings</a> page and copy your public and secret keys. These keys will be used as the <strong>BUYCOINS_API_PUBLIC</strong> and <strong>BUYCOINS_API_PUBLIC</strong> environment variables on Heroku.</p>
                 </div>
             </details>
 
             <details>
-                <summary>2. Decide how much you want to buy monthly</summary>
+                <summary>2. Create a Fauna database</summary>
                 <div>
-                    <p>...</p>
+                    <p>Sign up for an account with <a href="https://fauna.com">Fauna DB</a> and create a database (you can name it anything you want).</p>
+                    <p>Under your database security settings, create a new Key with the <strong>admin</strong> role and copy your generated secret key. This key will be used as the <strong>FAUNA_DB_SECRET</strong> environment variable on Heroku.</p>
+                    <p><img src="/images/fauna-db.png" alt=""></p>
                 </div>
             </details>
 
             <details>
-                <summary>2. Fork this repository</summary>
+                <summary>3. Decide on your daily/weekly/monthly spend</summary>
                 <div>
-                    <p>...</p>
+                    <p>You can specify how often and how much you want to buy Bitcoin by setting the following environment variables:</p>
+                    <p>
+                        <strong>BUY_FREQUENCY</strong><br>
+                        <ul>
+                            <li><em>DAILY</em> - if you want to buy every day</li>
+                            <li><em>WEEKLY_[1-7]</em> - if you want to buy once a week. e.g. WEEKLY_1 to buy every Monday</li>
+                            <li><em>MONTHLY_[1-29]</em> - if you want to buy once a month. e.g. MONTHLY_5 to buy on the 5th day of each month</li>
+                        </ul>
+                    </p>
+                    <p>
+                        <strong>BUY_AMOUNT</strong><br>
+                        The amount you want to purchase each time.
+                    </p>
+                    <p>If you need help choosing... </p>
+                </div>
+            </details>
+
+            <details>
+                <summary>4. Fork this repository on GitHub</summary>
+                <div>
+                    <p>To copy this code, fork <a href="https://github.com/ireade/buycoins-recurring-buy">this repository</a> to your account. If you don't want to use GitHub, you can download the code as a zip file.</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>5. Deploy to Heroku and add environment variables</summary>
+                <div>
+                    <p>[Create a button]</p>
+                </div>
+            </details>
+
+            <details>
+                <summary>6. Add environment variables</summary>
+                <div>
+                    <p>Next add the environment variables from the previous steps to your Heroku Project</p>
+                    <p><img src="/images/env.png" alt=""></p>
+                </div>
+            </details>
+
+            <details>
+                <summary>7. Setup daily scheduler</summary>
+                <div>
+                    <p>Under your Heroku project "Resources" tab, add the Heroku Scheduler add-on.</p>
+                    <p><img src="/images/heroku-add-on.png" alt=""></p>
+                    <p>Next, set the scheduler to run once every day at a time of your choosing. Make sure it's set to every day, regardless of your BUY_FREQUENCY. Set the command to <strong>recurringBuy</strong>.</p>
+                    <p><img src="/images/heroku-scheduler.png" alt=""></p>
                 </div>
             </details>
         </section>

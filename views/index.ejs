@@ -13,48 +13,56 @@
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>
-                <a href="/">
-                    <img src="/images/recurring.svg" alt="">
-                    Recurring Buy
-                </a>
-            </h1>
-            <a href="/setup">About</a>
-        </div>
-    </header>
+<header>
+    <div class="container">
+        <h1>
+            <a href="/">
+                <img src="/images/recurring.svg" alt="">
+                Recurring Buy
+            </a>
+        </h1>
+        <a href="/setup">About</a>
+    </div>
+</header>
 
-    <main class="container">
+<main class="container">
 
-        <%= summaries.length %>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>BTC Amount</th>
+                <th>NGNT Cost</th>
+                <th>Price per BTC</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% summaries.forEach(function(summary) { %>
 
-        <table>
-            <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>BTC Amount</th>
-                    <th>NGNT Cost</th>
-                    <th>Price per BTC</th>
+                    <td><%= summary.date %></td>
+                    <td><%= summary.amount || '' %></td>
+                    <td><%= '~' + summary.cost || '' %></td>
+                    <td><%= summary.price || '' %></td>
                 </tr>
-            </thead>
-            <tbody>
 
-                <% summaries.forEach(function(summary) { %>
+            <% }); %>
 
-                    <tr>
-                        <td><%= summary[0] %></td>
-                        <td><%= summary[4] %></td>
-                        <td><%= 'foo' %></td>
-                        <td><%= summary[5] %></td>
-                    </tr>
 
-                <% }); %>
+            <% if (summaries.length > 0) { %>
 
-            </tbody>
-        </table>
-    </main>
+                <tr class="footer">
+                    <td>&nbsp;</td>
+                    <td><%= totalAmount %></td>
+                    <td><%= totalCost %></td>
+                    <td>&nbsp;</td>
+                </tr>
 
-<script src="/js/script.js"></script>
+
+            <% } %>
+        </tbody>
+    </table>
+</main>
+
 </body>
 </html>

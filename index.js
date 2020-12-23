@@ -14,7 +14,52 @@ app.get('/', async (req, res) => {
 
     const summaries = await db.getAllSummaries();
 
-    res.render('index', { summaries });
+    function numberWithCommas(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function format(n, type) {
+        n = parseFloat(n);
+        n = n.toFixed(type === 'coin' ? 8 : 2);
+
+        if (type === 'fiat') n = numberWithCommas(n);
+
+        return n;
+    }
+
+    let totalAmount = 0;
+    let totalCost = 0;
+
+    summaries.forEach((s, index, arr) => {
+        const summary = {
+            date: s[0]
+        };
+
+        if (s[4] && s[5]) {
+            const amount = parseFloat(s[4]);
+            const price = parseFloat(s[5]);
+            const cost = amount * price;
+
+            summary.amount = format(amount, 'coin');
+            summary.price = format(price, 'fiat');
+            summary.cost = format(cost, 'fiat' );
+
+            totalAmount += parseFloat(amount);
+            totalCost += parseFloat(cost);
+        }
+
+        arr[index] = summary;
+    });
+
+    totalAmount = format(totalAmount, 'coin');
+    totalCost = format(totalCost, 'fiat');
+
+
+    res.render('index', { 
+        summaries,
+        totalAmount,
+        totalCost
+    });
 });
 
 app.get('/setup', (req, res) =>  {
