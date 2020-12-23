@@ -1,78 +1,18 @@
-const fs = require('fs');
-const path = require('path');
 const api = require('./api');
+const db = require('./db');
 
 const CONFIG = {
     AMOUNT: process.env.CONFIG_AMOUNT || 12000,
     FREQUENCY: process.env.CONFIG_FREQUENCY || 'DAILY', // DAILY, WEEKLY_[1-7], MONTHLY_[1-29]
 };
 
-const summaryFilePath = path.join(__dirname + '/../public/summary.json');
-
-const writeSummaryFile = (data) => {
-    return new Promise((resolve) => {
-        fs.writeFile(summaryFilePath, JSON.stringify(data), {encoding: 'utf-8'}, function(err,data){
-            if (!err) {
-                resolve(data)
-            } else {
-                console.log(err);
-            }
-        });
-
-    });
-};
-
-const readSummaryFile = () => {
-    return new Promise((resolve) => {
-        fs.readFile(summaryFilePath, {encoding: 'utf-8'}, function(err,data){
-            if (!err) {
-                resolve( JSON.parse(data) )
-            } else {
-                console.log(err);
-            }
-        });
-
-    });
-};
-
-const getTodaysKey = () => {
+const getTodaysDate = () => {
     const d = new Date();
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
     const day = d.getDate();
 
     return `${year}-${month}-${day}`;
-};
-
-const addPurchaseToSummary = async (data) => {
-    data.timestamp = Date.now();
-
-    const summary = await readSummaryFile();
-    const key = getTodaysKey();
-
-    if (!summary[key]) summary[key] = {};
-
-    summary[key].purchase = data;
-
-    console.log(data);
-
-    writeSummaryFile(summary);
-};
-
-const addErrorToSummary = async (data) => {
-    data.timestamp = Date.now();
-
-    const summary = await readSummaryFile();
-    const key = getTodaysKey();
-
-    if (!summary[key]) summary[key] = {};
-    if (!summary[key].errors) summary[key].errors = [];
-
-    summary[key].errors.push(data);
-
-    console.log(data);
-
-    writeSummaryFile(summary);
 };
 
 const checkIfShouldBuyToday = async () => {
@@ -101,10 +41,10 @@ const checkIfShouldBuyToday = async () => {
     }
 
     if (shouldBuyToday) {
-        const summary = await readSummaryFile();
-        const key = getTodaysKey();
+        const date = getTodaysDate();
+        const summary = await db.getSummaryByDate(date); 
 
-        shouldBuyToday = !(summary[key] && summary[key].purchase);
+        shouldBuyToday = !summary;
     }
 
     console.log("Should Buy Today:", shouldBuyToday)
@@ -147,8 +87,10 @@ const buyViaMarket = async () => {
     try {
         const marketOrder = await api.postMarketOrder(amountToBuy);
         return {
-            method: "market",
-            marketOrder
+            purchase_method: "market",
+            purchase_amount: marketOrder.coinAmount,
+            purchase_price: marketOrder.pricePerCoin,
+            purchase_id: marketOrder.id
         }
 
     } catch (error) {
@@ -160,7 +102,6 @@ const buyViaMarket = async () => {
 
     
 };
-
 
 const buyViaInstant = async () => {
     
@@ -181,8 +122,10 @@ const buyViaInstant = async () => {
     try {
         const instantOrder = await api.placeInstantOrder(amountToBuy, instantPrice.id);
         return {
-            method: "instant",
-            instantOrder
+            purchase_method: "instant",
+            purchase_amount: instantOrder.totalCoinAmount,
+            purchase_price: instantOrder.price.buyPricePerCoin,
+            purchase_id: instantOrder.id
         }
 
     } catch (error) {
@@ -199,15 +142,24 @@ module.exports = async () => {
 
     if ( !(await checkIfShouldBuyToday()) ) return;
 
+    const summary = {
+        summary_date: getTodaysDate()
+    };
+
     let result = await buyViaMarket();
-
     if (result.error) {
-        addErrorToSummary(result);
+        summary.error_market_order = `${result.error}:${result.message}`;
         result = await buyViaInstant();
+        if (result.error) summary.error_instant_order = `${result.error}:${result.message}`;
     }
 
-    if (result.method) {
-        addPurchaseToSummary(result);
+    if (result.purchase_method) {
+        summary.purchase_method = result.purchase_method,
+        summary.purchase_amount = result.purchase_amount,
+        summary.purchase_price = result.purchase_price,
+        summary.purchase_id = result.purchase_id
     }
+
+    db.addSummaryToDatabase(summary);
 
 };

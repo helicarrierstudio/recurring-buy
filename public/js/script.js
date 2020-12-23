@@ -66,7 +66,4 @@ fetch("/summary.json")
             `;
 
 
-        tableBody.innerHTML = tbody;
-
-
     })

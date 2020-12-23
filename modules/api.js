@@ -1,8 +1,8 @@
 const graphqlRequest = require('graphql-request');
 
 let secrets = {
-    public: process.env.BUYCOINS_API_PUBLIC,
-    secret: process.env.BUYCOINS_API_SECRET,
+    BUYCOINS_API_PUBLIC: process.env.BUYCOINS_API_PUBLIC,
+    BUYCOINS_API_SECRET: process.env.BUYCOINS_API_SECRET,
 };
 
 if (!process.env.BUYCOINS_API_PUBLIC) {
@@ -10,7 +10,7 @@ if (!process.env.BUYCOINS_API_PUBLIC) {
 } 
 
 const endpoint = 'https://backend.buycoins.tech/api/graphql';
-const authorization = 'Basic ' + Buffer.from(secrets.public  + ':' + secrets.secret).toString('base64');
+const authorization = 'Basic ' + Buffer.from(secrets.BUYCOINS_API_PUBLIC  + ':' + secrets.BUYCOINS_API_SECRET).toString('base64');
 
 const graphQLClient = new graphqlRequest.GraphQLClient(endpoint, {
     headers: {
@@ -161,4 +161,5 @@ module.exports = {
             });
 
     }
+
 };

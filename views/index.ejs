@@ -26,6 +26,9 @@
     </header>
 
     <main class="container">
+
+        <%= summaries.length %>
+
         <table>
             <thead>
                 <tr>
@@ -35,7 +38,19 @@
                     <th>Price per BTC</th>
                 </tr>
             </thead>
-            <tbody id="table-body">
+            <tbody>
+
+                <% summaries.forEach(function(summary) { %>
+
+                    <tr>
+                        <td><%= summary[0] %></td>
+                        <td><%= summary[4] %></td>
+                        <td><%= 'foo' %></td>
+                        <td><%= summary[5] %></td>
+                    </tr>
+
+                <% }); %>
+
             </tbody>
         </table>
     </main>

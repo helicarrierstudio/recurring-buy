@@ -3,18 +3,23 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const api = require('./modules/api');
+const db = require('./modules/db');
 
 app.set('port', (process.env.PORT || 5000));
+app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, '/public')));
 
-app.get('/', function (request, response) {
-    response.sendFile(path.join(__dirname + '/views/index.html'));
+app.get('/', async (req, res) => {
+
+    const summaries = await db.getAllSummaries();
+
+    res.render('index', { summaries });
 });
 
-app.get('/setup', function (request, response) {
-    response.sendFile(path.join(__dirname + '/views/setup.html'));
-})
+app.get('/setup', (req, res) =>  {
+    res.render('setup');
+});
 
 app.get('/api/setup', (req, res) => {
 
