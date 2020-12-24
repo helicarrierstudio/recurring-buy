@@ -1,0 +1,46 @@
+{
+    "name": "BuyCoins Recurring Buy",
+    "description": "Automatically spread your investment in Bitcoin over a period of time",
+    "repository": "https://github.com/ireade/buycoins-recurring-buy",
+    "logo": "https://node-js-sample.herokuapp.com/node.png",
+    "keywords": [
+        "node", 
+        "cryptocurrency", 
+        "bitcoin"
+    ],
+    "env": {
+        "BUYCOINS_API_PUBLIC": {
+          "description": "Your public key for the BuyCoins API",
+          "required": true
+        },
+        "BUYCOINS_API_SECRET": {
+            "description": "Your private/secret key for the BuyCoins API",
+            "required": true
+        },
+        "FAUNA_DB_SECRET": {
+            "description": "Your secret key for your Fauna Database",
+            "required": true
+        },
+        "BUY_FREQUENCY": {
+            "description": "How often you want to purchase.",
+            "required": true,
+            "value": "MONTHLY_1"
+        },
+        "BUY_AMOUNT": {
+            "description": "How much (in Naira) you want to purchase",
+            "required": true,
+            "value": "10000"
+        }
+      },
+
+      "addons": [
+        "scheduler"
+      ],
+
+      "buildpacks": [
+        {
+          "url": "https://github.com/heroku/heroku-buildpack-nodejs#latest"
+        }
+      ]
+
+  }
