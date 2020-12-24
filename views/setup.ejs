@@ -33,21 +33,20 @@
         <section>
             <h2>What you'll need</h2>
             <ul>
-                <li>An account on  <a href="https://buycoins.africa/">BuyCoins</a>, with access to the API (see below)</li>
+                <li>A <a href="https://buycoins.africa/">BuyCoins</a> account, with access to the API (see below)</li>
                 <li>A <a href="https://heroku.com">Heroku</a> account</li>
                 <li>A <a href="https://fauna.com">Fauna DB</a> account</li>
-                <li>A <a href="https://github.com">GitHub</a> account (optional, but will make it easier to copy this project)</li>
             </ul>
         </section>
 
         <section>
-            <h2>Steps</h2>
+            <h2>Setup</h2>
 
             <details open>
                 <summary>1. Get access to the BuyCoins API</summary>
                 <div>
-                    <p>You'll need access to the <a href="http://developers.buycoins.africa/">BuyCoins API</a> in order to make automatic purchases. To apply for access, send an email to <a href="support@buycoins.africa">support@buycoins.africa</a>.</p>
-                    <p>Once you have access, go to the <a href="https://buycoins.africa/settings/api">API Settings</a> page and copy your public and secret keys. These keys will be used as the <code>BUYCOINS_API_PUBLIC</code> and <code>BUYCOINS_API_SECRET</code> environment variables on Heroku.</p>
+                    <p>You'll need access to the <a href="http://developers.buycoins.africa/">BuyCoins API</a> in order to make automatic purchases. To apply for access, send an email to <a href="mailto:support@buycoins.africa">support@buycoins.africa</a>.</p>
+                    <p>Once you have access, go to your <a href="https://buycoins.africa/settings/api">API Settings</a> page. Generate and copy your public and secret keys. These keys will be used as the <code>BUYCOINS_API_PUBLIC</code> and <code>BUYCOINS_API_SECRET</code> environment variables on Heroku.</p>
                 </div>
             </details>
 
@@ -60,55 +59,108 @@
                 </div>
             </details>
 
-            <details>
+            <details <%= true ? 'open' : '' %>>
                 <summary>3. Decide on your daily/weekly/monthly spend</summary>
                 <div>
-                    <p>You can specify how often and how much you want to buy Bitcoin by setting the following environment variables:</p>
+                    <p>Next, you'll need to specify how often you want to buy Bitcoin, and how much you want to spend on each purchase. You do this by setting the following environment variables:</p>
+                    <br>
                     <p>
                         <code>BUY_FREQUENCY</code><br>
                         <ul>
-                            <li><code>DAILY</code> - if you want to buy every day</li>
-                            <li><code>WEEKLY_[1-7]</code> - if you want to buy once a week. e.g. WEEKLY_1 to buy every Monday</li>
-                            <li><code>MONTHLY_[1-29]</code> - if you want to buy once a month. e.g. MONTHLY_5 to buy on the 5th day of each month</li>
+                            <li><em>DAILY</em> - if you want to buy every day</li>
+                            <li><em>WEEKLY_[1-7]</em> - if you want to buy once a week. e.g. WEEKLY_1 to buy every Monday</li>
+                            <li><em>MONTHLY_[1-29]</em> - if you want to buy once a month. e.g. MONTHLY_5 to buy on the 5th day of each month</li>
                         </ul>
                     </p>
+                    <br>
                     <p>
                         <code>BUY_AMOUNT</code><br>
-                        The amount you want to purchase each time.
+                        The amount (in Naira) you want to purchase each time.
                     </p>
-                    <p>If you need help choosing... </p>
+                    <br>
+                    <h3>Need help?</h3>
+                    <p>If you need help choosing, use this form to enter how much you want to spend each month: </p>
+
+                    <form action="/setup#form" id="form" method="post">
+                        <label for="monthly_spend">How much do you want to spend (in Naira) each month?</label>
+                        <input type="number" id="monthly_spend" name="monthly_spend" value="15000">
+
+                        <button type="submit">Calculate</button>
+                    </form>
+
+                    <% if (setupOptions) { %>
+
+                        <p>The current price per Bitcoin on BuyCoins is <strong>₦<%= setupOptions.buyPrice %> per BTC</strong>. With ₦<%= setupOptions.monthlySpend %>, you can buy <%= setupOptions.monthlyAmount %> BTC each month.</p>
+
+                        <% if (setupOptions.suggestedOption) { %>
+                            <br>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th><code>BUY_FREQUENCY</code></th>
+                                        <th><code>BUY_AMOUNT</code></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (setupOptions.daily.available) { %>
+                                        <tr>
+                                            <td>Buy daily</td>
+                                            <td><code>DAILY</code></td>
+                                            <td><code><%= setupOptions.daily.spend %></code></td>
+                                        </tr>
+                                    <% } %>
+                                    <% if (setupOptions.weekly.available) { %>
+                                        <tr>
+                                            <td>Buy once a week</td>
+                                            <td><code>WEEKLY_<%= new Date().getDay() %></code></td>
+                                            <td><code><%= setupOptions.weekly.spend %></code></td>
+                                        </tr>
+                                    <% } %>
+                                    <% if (setupOptions.monthly.available) { %>
+                                        <tr>
+                                            <td>Buy once a month</td>
+                                            <td><code>MONTHLY_<%= new Date().getDate() > 29 ? 29 : new Date().getDate() %></code></td>
+                                            <td><code><%= setupOptions.monthly.spend %></code></td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+
+                        <% } else { %>
+
+                            <p>Unfortunately, the current minimum buy on BuyCoins is <%= setupOptions.minBuy %> BTC. The amount of BTC you can purchase with ₦<%= setupOptions.monthlySpend %> is too small. Please try a larger amount.</p>
+
+                        <% } %>
+
+                    <% } %>
                 </div>
             </details>
 
             <details>
-                <summary>4. Fork this repository on GitHub</summary>
+                <summary>4. Deploy to Heroku and add environment variables</summary>
                 <div>
-                    <p>To copy this code, fork <a href="https://github.com/ireade/buycoins-recurring-buy">this repository</a> to your account. If you don't want to use GitHub, you can download the code as a zip file.</p>
-                </div>
-            </details>
-
-            <details>
-                <summary>5. Deploy to Heroku and add environment variables</summary>
-                <div>
-                    <p>[Create a button]</p>
-                </div>
-            </details>
-
-            <details>
-                <summary>6. Add environment variables</summary>
-                <div>
-                    <p>Next add the environment variables from the previous steps to your Heroku Project</p>
+                    <p>
+                        <a href="https://heroku.com/deploy?template=https://github.com/ireade/buycoins-recurring-buy">
+                            <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
+                        </a>
+                    </p>
+                    <p>When deploying, you'll need to add the environment variables from the previous steps to your new app.</p>
                     <p><img src="/images/env.png" alt=""></p>
                 </div>
             </details>
 
             <details>
-                <summary>7. Setup daily scheduler</summary>
+                <summary>5. Setup Heroku Scheduler</summary>
                 <div>
-                    <p>Under your Heroku project "Resources" tab, add the Heroku Scheduler add-on.</p>
-                    <p><img src="/images/heroku-add-on.png" alt=""></p>
-                    <p>Next, set the scheduler to run once every day at a time of your choosing. Make sure it's set to every day, regardless of your <code>BUY_FREQUENCY</code>. Set the command to <strong>recurringBuy</strong>.</p>
+                    <p>Under your Heroku project "Resources" tab, click the Heroku Scheduler Add-on.</p>
+                    <p>Next, create a new job using the following settings":</p>
+                    <ul>
+                        <li>Schedule: Every day at.. (any time of your choosing)</li>
+                        <li>Run Command: <code>recurringBuy</code></li>
+                    </ul>
                     <p><img src="/images/heroku-scheduler.png" alt=""></p>
+                    <p>Note: Make sure the job is set to run every day, regardless of your <code>BUY_FREQUENCY</code></p>
                 </div>
             </details>
         </section>

@@ -2,6 +2,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const bodyParser = require('body-parser');
 const api = require('./modules/api');
 const db = require('./modules/db');
 
@@ -9,6 +10,8 @@ app.set('port', (process.env.PORT || 5000));
 app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, '/public')));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', async (req, res) => {
 
@@ -63,29 +66,35 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/setup', (req, res) =>  {
-    res.render('setup');
+    res.render('setup', { setupOptions: null });
 });
 
-app.get('/api/setup', (req, res) => {
+app.post('/setup', async (req, res) => {
+
+    console.log(req.body);
 
     
-    const getOptions = async (nairaSpendPerMonth) => {
+    const getOptions = async (monthlySpend) => {
 
-        nairaSpendPerMonth = parseFloat(nairaSpendPerMonth);
+        monthlySpend = parseFloat(monthlySpend);
 
         const price = (await api.getInstantPrices())[0];
         const buyPrice = parseFloat(price.buyPricePerCoin);
         const minBuy = parseFloat(price.minBuy);
 
-        const coinAmountForNairaSpend = nairaSpendPerMonth / price.buyPricePerCoin;
+        const monthlyAmount = monthlySpend / price.buyPricePerCoin;
 
-        console.log(coinAmountForNairaSpend)
+        console.log(monthlyAmount)
 
-        console.log(`With NGN${nairaSpendPerMonth}, you can buy ${coinAmountForNairaSpend} BTC each month`);
+        console.log(`With NGN${monthlySpend}, you can buy ${monthlyAmount} BTC each month`);
 
-        const daily = coinAmountForNairaSpend / 30;
-        const weekly = coinAmountForNairaSpend / 4;
-        const monthly = coinAmountForNairaSpend;
+        const daily = monthlyAmount / 30;
+        const weekly = monthlyAmount / 4;
+        const monthly = monthlyAmount;
+
+        const dailySpend = daily * buyPrice;
+        const weeklySpend = weekly * buyPrice;
+        // const monthlySpend = monthly * buyPrice;
 
         const dailyAvailable = daily >= minBuy;
         const weeklyAvailable = weekly >= minBuy;
@@ -96,17 +105,52 @@ app.get('/api/setup', (req, res) => {
         console.log(`Monthly: ${monthly} BTC (${monthlyAvailable ? 'available' : 'unavailable'})`);
 
 
-        let option = dailyAvailable ? 'daily' : weeklyAvailable ? 'weekly' : monthlyAvailable ? 'monthly' : null;
+        let suggestedOption = dailyAvailable ? 'daily' : weeklyAvailable ? 'weekly' : monthlyAvailable ? 'monthly' : null;
 
-        if (option) {
-            console.log(`Based on the current minimum buy of ${minBuy} BTC, we recommend you go with a ${option} buy`);
+        if (suggestedOption) {
+            console.log(`Based on the current minimum buy of ${minBuy} BTC, we recommend you go with a ${suggestedOption} buy`);
         } else {
             console.log(`Based on the current minimum buy of ${minBuy} BTC, the amount you've chosen is too small`);
         }
+
+        return {
+            buyPrice,
+            minBuy,
+            monthlySpend,
+            monthlyAmount,
+
+            daily: {
+                amount: daily,
+                spend: dailySpend,
+                available: dailyAvailable
+            },
+            weekly: {
+                amount: weekly,
+                spend: weeklySpend,
+                available: weeklyAvailable
+            },
+            monthly: {
+                amount: monthly,
+                spend: monthlySpend,
+                available: monthlyAvailable
+            },
+
+            suggestedOption,
+        }
     };
 
-    getOptions(40000)
+    const setupOptions = await getOptions(req.body.monthly_spend);
 
+    console.log(setupOptions);
+
+    res.render('setup', {
+        setupOptions
+    });
+
+});
+
+app.get('/welcome', (req, res) =>  {
+    res.render('welcome');
 });
 
 app.listen(app.get('port'), function () {

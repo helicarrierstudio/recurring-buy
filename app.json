@@ -1,13 +1,15 @@
 {
     "name": "BuyCoins Recurring Buy",
-    "description": "Automatically spread your investment in Bitcoin over a period of time",
+    "description": "Automatically spread your investment in crypto over a period of time",
     "repository": "https://github.com/ireade/buycoins-recurring-buy",
     "logo": "https://node-js-sample.herokuapp.com/node.png",
     "keywords": [
         "node", 
         "cryptocurrency", 
-        "bitcoin"
+        "bitcoin",
+        "buycoins"
     ],
+    "success_url": "/welcome",
     "env": {
         "BUYCOINS_API_PUBLIC": {
           "description": "Your public key for the BuyCoins API",
@@ -32,15 +34,12 @@
             "value": "10000"
         }
       },
-
       "addons": [
         "scheduler"
       ],
-
       "buildpacks": [
         {
           "url": "https://github.com/heroku/heroku-buildpack-nodejs#latest"
         }
       ]
-
   }
