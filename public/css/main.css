@@ -1,5 +1,6 @@
 :root {
     --color-primary: #966FDB;
+    --color-border: #ececec;
 }
 
 
@@ -78,7 +79,7 @@ a {
 
 code {
     background-color: #fff;
-    border: 1px solid #ececec;
+    border: 1px solid var(--color-border);
     padding: 0 0.3em;
 
 
@@ -131,18 +132,14 @@ p img {
 /* Table */
 
 table {
-
     background-color: #fff;
-
-
-    border: 1px solid #ececec;
+    border: 1px solid var(--color-border);
     width: 100%;
     text-align: left;
-
 }
 
 table thead {
-    border-bottom: 1px solid #ececec;
+    border-bottom: 1px solid var(--color-border);
 }
 
 table td {
@@ -183,9 +180,19 @@ form label {
 
 form input,
 form button {
-    height: 50px;
+    height: 40px;
     font-weight: 300;
     padding: 0 1em;
+    border-radius: 5px;
+}
+
+form input {
+    border: 1px solid var(--color-border);
+}
+
+form button {
+    border: none;
+    background-color: var(--color-border);
 }
 
 

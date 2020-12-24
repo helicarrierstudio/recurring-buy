@@ -2,8 +2,8 @@ const api = require('./api');
 const db = require('./db');
 
 const CONFIG = {
-    AMOUNT: process.env.BUY_AMOUNT || 12000,
-    FREQUENCY: process.env.BUY_FREQUENCY || 'DAILY', // DAILY, WEEKLY_[1-7], MONTHLY_[1-29]
+    AMOUNT: process.env.BUY_AMOUNT,
+    FREQUENCY: process.env.BUY_FREQUENCY,
 };
 
 const getTodaysDate = () => {
@@ -47,7 +47,7 @@ const checkIfShouldBuyToday = async () => {
         shouldBuyToday = !summary;
     }
 
-    console.log("Should Buy Today:", shouldBuyToday)
+    console.log("Should Buy Today:", shouldBuyToday);
     return shouldBuyToday;
 };
 
@@ -139,6 +139,8 @@ const buyViaInstant = async () => {
 
 
 module.exports = async () => {
+
+    if (!CONFIG.AMOUNT || !CONFIG.FREQUENCY) return console.error("missing configuration");
 
     if ( !(await checkIfShouldBuyToday()) ) return;
 

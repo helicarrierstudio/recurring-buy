@@ -15,6 +15,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', async (req, res) => {
 
+    const CONFIG = {
+        AMOUNT: process.env.BUY_AMOUNT || 12000,
+        FREQUENCY: process.env.BUY_FREQUENCY || 'DAILY',
+    };
+
     const summaries = await db.getAllSummaries();
 
     function numberWithCommas(x) {
@@ -57,8 +62,8 @@ app.get('/', async (req, res) => {
     totalAmount = format(totalAmount, 'coin');
     totalCost = format(totalCost, 'fiat');
 
-
     res.render('index', { 
+        CONFIG,
         summaries,
         totalAmount,
         totalCost
