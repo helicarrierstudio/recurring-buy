@@ -7,62 +7,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="/css/reset.css">
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-<header>
-    <div class="container">
-        <h1>
-            <a href="/">
-                <img src="/images/recurring.svg" alt="">
-                Recurring Buy
-            </a>
-        </h1>
-        <a href="/setup">About</a>
-    </div>
-</header>
+    <header id="site-header">
+        <div class="container">
+            <h1>
+                <a href="/">
+                    <img src="/images/recurring.svg" class="logo" alt="">
+                </a>
+            </h1>
+            <a href="/setup">About/Setup</a>
+        </div>
+    </header>
 
-<main class="container">
+    <main>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>BTC Amount</th>
-                <th>NGNT Cost</th>
-                <th>Price per BTC</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% summaries.forEach(function(summary) { %>
+        <div class="container">
+            <section class="card">
+                <h2>Summary</h2>
+                <p>You're buying <strong><%= CONFIG.AMOUNT %></strong> worth of Bitcoin every <strong><%= CONFIG.FREQUENCY %></strong></p>
+            </section>
+        </div>
 
+        <table>
+            <thead>
                 <tr>
-                    <td><%= summary.date %></td>
-                    <td><%= summary.amount || '' %></td>
-                    <td><%= '~' + summary.cost || '' %></td>
-                    <td><%= summary.price || '' %></td>
+                    <th>Date</th>
+                    <th>BTC Amount</th>
+                    <th>NGNT Cost</th>
+                    <th>Price per BTC</th>
                 </tr>
+            </thead>
+            <tbody>
+                <% summaries.forEach(function(summary) { %>
 
-            <% }); %>
+                    <tr>
+                        <td><%= summary.date %></td>
+                        <td><%= summary.amount || '' %></td>
+                        <td><%= '~' + summary.cost || '' %></td>
+                        <td><%= summary.price || '' %></td>
+                    </tr>
+
+                <% }); %>
 
 
-            <% if (summaries.length > 0) { %>
+                <% if (summaries.length > 0) { %>
 
-                <tr class="footer">
-                    <td>&nbsp;</td>
-                    <td><%= totalAmount %></td>
-                    <td><%= totalCost %></td>
-                    <td>&nbsp;</td>
-                </tr>
+                    <tr class="footer">
+                        <td>&nbsp;</td>
+                        <td><%= totalAmount %></td>
+                        <td><%= totalCost %></td>
+                        <td>&nbsp;</td>
+                    </tr>
 
 
-            <% } %>
-        </tbody>
-    </table>
-</main>
+                <% } %>
+            </tbody>
+        </table>
+    </main>
 
 </body>
 </html>

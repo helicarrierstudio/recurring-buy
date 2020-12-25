@@ -7,30 +7,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="/css/reset.css">
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-    <header>
+    <header id="site-header">
         <div class="container">
             <h1>
                 <a href="/">
-                    <img src="/images/recurring.svg" alt="">
-                    Recurring Buy
+                    <img src="/images/recurring.svg" class="logo" alt="">
                 </a>
             </h1>
         </div>
     </header>
 
     <main class="container">
-        <section>
+        <section class="card">
             <h2>What is this?</h2>
-            <p>This is an open-source project which you can use to spread your investment in Bitcoin over a period of time. Select how much you want to spend each month and make automated purchases daily, weekly, or monthly!</p>
+            <p>This is an open-source project which you can use to spread your investment in Bitcoin over a period of time. Make automated purchases of Bitcoin daily, weekly, or monthly!</p>
         </section>
 
-        <section>
+        <section class="card">
             <h2>What you'll need</h2>
             <ul>
                 <li>A <a href="https://buycoins.africa/">BuyCoins</a> account, with access to the API (see below)</li>
@@ -39,7 +38,7 @@
             </ul>
         </section>
 
-        <section>
+        <section class="card">
             <h2>Setup</h2>
 
             <details open>
@@ -59,7 +58,7 @@
                 </div>
             </details>
 
-            <details <%= true ? 'open' : '' %>>
+            <details <%= !!setupOptions ? 'open' : '' %>>
                 <summary>3. Decide on your daily/weekly/monthly spend</summary>
                 <div>
                     <p>Next, you'll need to specify how often you want to buy Bitcoin, and how much you want to spend on each purchase. You do this by setting the following environment variables:</p>

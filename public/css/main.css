@@ -1,8 +1,8 @@
 :root {
     --color-primary: #966FDB;
+    --color-bg: #f2f5f8;
     --color-border: #ececec;
 }
-
 
 html {
     font-size: 62.5%;
@@ -10,61 +10,30 @@ html {
 
 body {
     font-family: 'Inter', sans-serif;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     line-height: 1.4;
     font-weight: 300;
-    background-color: #f2f5f8;
-    color: rgb(50,50,50);
+    background-color: var(--color-bg);
+    color: rgb(90,90,90);
 }
 
 /* Typography */
 
-h1 {
-    color: #000;
-    font-weight: 500;
-}
-
-h1 a {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-h1 img {
-    width: 25px;
-    height: auto;
-    margin-right: 10px;
-}
-
 h2 {
-    color: #fff;
-    font-weight: 500;
+    color: #000;
+    font-weight: 400;
     font-size: 1.8rem;
     margin-bottom: 10px;
     position: relative;
     display: inline-block;
-    text-transform: lowercase;
 }
 
 h3 {
-    color: #fff;
-    font-weight: 500;
+    color: #000;
+    font-weight: 400;
     font-size: 1.5rem;
     position: relative;
     display: inline-block;
-    text-transform: lowercase;
-}
-
-h2::before,
-h3::before {
-    content: "";
-    z-index: -1;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1em;
-    background-color: var(--color-primary);;
 }
 
 p {
@@ -89,20 +58,43 @@ code {
 
 .container {
     width: 90%;
-    max-width: 700px;
+    max-width: 900px;
     margin-right: auto;
     margin-left: auto;
 }
 
-header {
+.card {
     background-color: #fff;
-    padding: 20px 0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px;
 }
 
-header .container {
+.card header {
+    /* border-bottom: 1px solid var(--color-border); */
+    padding: 20px;
+}
+
+.card .body {
+    padding: 10px 20px;
+}
+
+#site-header {
+    border-bottom: 1px solid var(--color-border);
+    padding: 20px 0;
+    margin-bottom: 30px;
+}
+
+#site-header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.logo {
+    width: 25px;
+    height: auto;
+    margin-right: 10px;
 }
 
 main {
@@ -117,10 +109,6 @@ main {
     }
 }
 
-header {
-    margin-bottom: 30px;
-}
-
 section {
     margin-bottom: 40px;
 }
@@ -132,13 +120,23 @@ p img {
 /* Table */
 
 table {
-    background-color: #fff;
-    border: 1px solid var(--color-border);
+    width: 100%;
+    max-width: 900px;
+    margin-right: auto;
+    margin-left: auto;
+
+    background-color: transparent;
     width: 100%;
     text-align: left;
 }
 
 table thead {
+    border-top: 1px solid var(--color-border);
+    font-weight: 400;
+    color: #000;
+}
+
+table tr {
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -162,8 +160,9 @@ table td:last-of-type {
 }
 
 table tr.footer {
-    background-color: #f2f5f8;
-    font-weight: 500;
+    background-color: var(--color-bg);
+    font-weight: 400;
+    color: #000;
 }
 
 /* Form */
@@ -174,7 +173,7 @@ form {
 
 form label {
     display: block;
-    font-weight: 500;
+    font-weight: 400;
     margin-bottom: 0.5em;
 }
 
@@ -188,11 +187,15 @@ form button {
 
 form input {
     border: 1px solid var(--color-border);
+    background-color: var(--color-bg);
 }
 
 form button {
-    border: none;
-    background-color: var(--color-border);
+    border: 1px solid var(--color-primary);
+    background-color: #fff;
+    color: var(--color-primary);
+    font-weight: 400;
+    cursor: pointer;
 }
 
 
@@ -204,7 +207,7 @@ details {
 
 details summary {
     margin-bottom: 1em;
-    font-weight: 500;
+    font-weight: 400;
     cursor: pointer;
 }
 

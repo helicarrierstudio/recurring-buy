@@ -13,27 +13,28 @@ app.use(express.static(path.join(__dirname, '/public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/', async (req, res) => {
-
-    const CONFIG = {
-        AMOUNT: process.env.BUY_AMOUNT || 12000,
-        FREQUENCY: process.env.BUY_FREQUENCY || 'DAILY',
-    };
-
-    const summaries = await db.getAllSummaries();
+function format(n, type) {
 
     function numberWithCommas(x) {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+    
+    n = parseFloat(n);
+    n = n.toFixed(type === 'coin' ? 8 : 2);
 
-    function format(n, type) {
-        n = parseFloat(n);
-        n = n.toFixed(type === 'coin' ? 8 : 2);
+    if (type === 'fiat') n = numberWithCommas(n);
 
-        if (type === 'fiat') n = numberWithCommas(n);
+    return n;
+}
 
-        return n;
-    }
+app.get('/', async (req, res) => {
+
+    const CONFIG = {
+        AMOUNT: format(process.env.BUY_AMOUNT || 12000, 'fiat'),
+        FREQUENCY: process.env.BUY_FREQUENCY || 'DAILY',
+    };
+
+    const summaries = await db.getAllSummaries();
 
     let totalAmount = 0;
     let totalCost = 0;
@@ -119,23 +120,23 @@ app.post('/setup', async (req, res) => {
         }
 
         return {
-            buyPrice,
-            minBuy,
-            monthlySpend,
-            monthlyAmount,
+            buyPrice: format(buyPrice, 'fiat'),
+            minBuy: format(minBuy, 'coin'),
+            monthlySpend: format(monthlySpend, 'fiat'),
+            monthlyAmount: format(monthlyAmount, 'coin'),
 
             daily: {
-                amount: daily,
+                amount: format(daily, 'coin'),
                 spend: dailySpend,
                 available: dailyAvailable
             },
             weekly: {
-                amount: weekly,
+                amount: format(weekly, 'coin'),
                 spend: weeklySpend,
                 available: weeklyAvailable
             },
             monthly: {
-                amount: monthly,
+                amount: format(monthly, 'coin'),
                 spend: monthlySpend,
                 available: monthlyAvailable
             },
