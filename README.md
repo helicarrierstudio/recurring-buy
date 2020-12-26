@@ -1,3 +1,5 @@
+![](public/images/icon-152.png)
+
 # BuyCoins Recurring Buy
 
 This is an open-source project which you can use to spread your investment in Bitcoin over a period of time. Make automated purchases of Bitcoin daily, weekly, or monthly!
