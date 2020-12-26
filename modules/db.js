@@ -118,29 +118,4 @@ module.exports = {
     addSummaryToDatabase: addSummaryToDatabase,
     getAllSummaries: getAllSummaries,
     setupCollection: setupCollection,
-
-    test: () => {
-
-        return client.query(
-            q.CreateIndex({
-                name: 'all_summaries_reversed',
-                source: q.Collection(DB_COLLECTION_NAME),
-                values: [
-                    { field: ['data', 'summary_date'] },
-                    { field: ['data', 'error_market_order'] },
-                    { field: ['data', 'error_instant_order'] },
-                    { field: ['data', 'purchase_method'] },
-                    { field: ['data', 'purchase_amount'] },
-                    { field: ['data', 'purchase_price'] },
-                    { field: ['data', 'purchase_id'] },
-                    { field: ['ts'], reverse: true },
-                ],
-            })
-        )
-        .then((ret) => console.log(ret))
-        .catch((error) => console.log(error));
-
-
-
-    }
 }

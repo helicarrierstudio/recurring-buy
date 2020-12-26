@@ -52,6 +52,8 @@ app.get('/', async (req, res) => {
         arr[index] = summary;
     });
 
+    summaries.reverse();
+
     totalAmount = bn.format(totalAmount, 'coin');
     totalCost = bn.format(totalCost, 'fiat');
     avergaePrice = bn.format( bn.average(prices, 'fiat'), 'fiat' );
