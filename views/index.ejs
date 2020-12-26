@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>BuyCoins Recurring Buy</title>
+    <title>Recurring Buy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -11,6 +11,23 @@
 
     <link rel="stylesheet" href="/css/reset.css">
     <link rel="stylesheet" href="/css/main.css">
+
+    <meta name="color-scheme" content="light dark">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/icon-152.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Recurring Buy">
+
+    <meta property="og:title" content="Recurring Buy">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/images/icon-512.png">
+    <meta property="og:description"
+          content="This is an open-source project which you can use to spread your investment in Bitcoin over a period of time. Make automated purchases of Bitcoin daily, weekly, or monthly!">
+    <meta property="og:url" content="https://buycoins-recurring-buy.herokuapp.com">
 </head>
 <body>
     <header id="site-header">
@@ -30,11 +47,11 @@
             <section class="card">
                 <h2>Summary</h2>
                 <p>Frequency: <strong><%= CONFIG.FREQUENCY %></strong></p>
-                <p>Amount: <strong><%= CONFIG.AMOUNT %> NGNT worth of Bitcoin</strong></p>
+                <p>Amount: <strong>₦<%= CONFIG.AMOUNT %> worth of Bitcoin</strong></p>
                 <br>
                 <p>Total Bitcoin Bought: <%= totalAmount %> BTC</p>
-                <p>Total Spent: <%= totalCost %> NGNT</p>
-                <p>Average Price: <%= avergaePrice %> NGNT/BTC</p>
+                <p>Total Spent: ₦<%= totalCost %></p>
+                <p>Average Price: ₦<%= avergaePrice %> /BTC</p>
                 <p>Times Bought: <%= summaries.length %></p>
             </section>
         </div>
@@ -44,8 +61,8 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>BTC Amount</th>
-                        <th class="column-cost">NGNT Cost</th>
+                        <th>BTC Bought</th>
+                        <th class="column-cost">Cost</th>
                         <th>Price per BTC</th>
                     </tr>
                 </thead>
@@ -54,7 +71,7 @@
                         <tr>
                             <td><%= summary.date %></td>
                             <td><%= summary.amount || '' %></td>
-                            <td class="column-cost"><%= summary.cost || '' %></td>
+                            <td class="column-cost"><%= '₦' + summary.cost || '' %></td>
                             <td><%= summary.price || '' %></td>
                         </tr>
                     <% }); %>
