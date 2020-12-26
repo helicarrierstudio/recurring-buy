@@ -1,6 +1,7 @@
 # Buycoins Recurring Buy
 
+This is an open-source project which you can use to spread your investment in Bitcoin over a period of time. Make automated purchases of Bitcoin daily, weekly, or monthly!
 
+[Setup Instructions](https://buycoins-recurring-buy.herokuapp.com/setup)
 
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ireade/buycoins-recurring-buy)
+(Still a work in progress so use at your own risk!)
