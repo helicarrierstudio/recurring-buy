@@ -67,6 +67,15 @@ module.exports = {
         return round(result, type);
     },
 
+    average(arr, type) {
+        const count = new BigNumber(arr.length);
+        const sum = BigNumber.sum.apply(null, arr);
+
+        let result = sum.dividedBy(count);
+
+        return round(result, type);
+    },
+
     isGreaterThanOrEqualTo(a, b) {
         a = new BigNumber(a || 0);
         b = new BigNumber(b || 0);

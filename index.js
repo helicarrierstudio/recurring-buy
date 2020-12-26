@@ -26,6 +26,8 @@ app.get('/', async (req, res) => {
 
     let totalAmount = 0;
     let totalCost = 0;
+    let avergaePrice = 0;
+    let prices = [];
 
     summaries.forEach((s, index, arr) => {
         const summary = {
@@ -43,6 +45,8 @@ app.get('/', async (req, res) => {
 
             totalAmount = bn.add( totalAmount, amount, 'coin' );
             totalCost = bn.add( totalCost, cost, 'coin' );
+
+            prices.push(price);
         }
 
         arr[index] = summary;
@@ -50,12 +54,15 @@ app.get('/', async (req, res) => {
 
     totalAmount = bn.format(totalAmount, 'coin');
     totalCost = bn.format(totalCost, 'fiat');
+    avergaePrice = bn.format( bn.average(prices, 'fiat'), 'fiat' );
+
 
     res.render('index', { 
         CONFIG,
         summaries,
         totalAmount,
-        totalCost
+        totalCost,
+        avergaePrice
     });
 });
 
