@@ -5,6 +5,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const api = require('./modules/api');
 const db = require('./modules/db');
+const bn = require('./modules/big-number');
 
 app.set('port', (process.env.PORT || 5000));
 app.set('view engine', 'ejs');
@@ -13,24 +14,11 @@ app.use(express.static(path.join(__dirname, '/public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-function format(n, type) {
-
-    function numberWithCommas(x) {
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-    
-    n = parseFloat(n);
-    n = n.toFixed(type === 'coin' ? 8 : 2);
-
-    if (type === 'fiat') n = numberWithCommas(n);
-
-    return n;
-}
 
 app.get('/', async (req, res) => {
 
     const CONFIG = {
-        AMOUNT: format(process.env.BUY_AMOUNT || 12000, 'fiat'),
+        AMOUNT: bn.format(process.env.BUY_AMOUNT || 12000, 'fiat'),
         FREQUENCY: process.env.BUY_FREQUENCY || 'DAILY',
     };
 
@@ -45,23 +33,23 @@ app.get('/', async (req, res) => {
         };
 
         if (s[4] && s[5]) {
-            const amount = parseFloat(s[4]);
-            const price = parseFloat(s[5]);
-            const cost = amount * price;
+            const amount = s[4];
+            const price = s[5];
+            const cost = bn.multiply(amount, price, 'fiat');
 
-            summary.amount = format(amount, 'coin');
-            summary.price = format(price, 'fiat');
-            summary.cost = format(cost, 'fiat' );
+            summary.amount = bn.format(amount, 'coin');
+            summary.price = bn.format(price, 'fiat');
+            summary.cost = bn.format(cost, 'fiat' );
 
-            totalAmount += parseFloat(amount);
-            totalCost += parseFloat(cost);
+            totalAmount = bn.add( totalAmount, amount, 'coin' );
+            totalCost = bn.add( totalCost, cost, 'coin' );
         }
 
         arr[index] = summary;
     });
 
-    totalAmount = format(totalAmount, 'coin');
-    totalCost = format(totalCost, 'fiat');
+    totalAmount = bn.format(totalAmount, 'coin');
+    totalCost = bn.format(totalCost, 'fiat');
 
     res.render('index', { 
         CONFIG,
@@ -77,66 +65,45 @@ app.get('/setup', (req, res) =>  {
 
 app.post('/setup', async (req, res) => {
 
-    console.log(req.body);
-
     
     const getOptions = async (monthlySpend) => {
 
-        monthlySpend = parseFloat(monthlySpend);
-
+    
         const price = (await api.getInstantPrices())[0];
-        const buyPrice = parseFloat(price.buyPricePerCoin);
-        const minBuy = parseFloat(price.minBuy);
+        const buyPrice = bn.round(price.buyPricePerCoin, 'fiat');
+        const minBuy = bn.round(price.minBuy, 'coin');
 
-        const monthlyAmount = monthlySpend / price.buyPricePerCoin;
+        const monthlyAmount = bn.divide(monthlySpend, buyPrice, 'coin');
+        const monthlyAvailable = bn.isGreaterThanOrEqualTo(monthlyAmount, minBuy);
 
-        console.log(monthlyAmount)
+        const weeklyAmount = bn.divide(monthlyAmount, 4, 'coin');
+        const weeklySpend = bn.multiply(weeklyAmount, buyPrice, 'fiat');
+        const weeklyAvailable = bn.isGreaterThanOrEqualTo(weeklyAmount, minBuy);
 
-        console.log(`With NGN${monthlySpend}, you can buy ${monthlyAmount} BTC each month`);
-
-        const daily = monthlyAmount / 30;
-        const weekly = monthlyAmount / 4;
-        const monthly = monthlyAmount;
-
-        const dailySpend = daily * buyPrice;
-        const weeklySpend = weekly * buyPrice;
-        // const monthlySpend = monthly * buyPrice;
-
-        const dailyAvailable = daily >= minBuy;
-        const weeklyAvailable = weekly >= minBuy;
-        const monthlyAvailable = monthly >= minBuy;
-
-        console.log(`Daily: ${daily} BTC (${dailyAvailable ? 'available' : 'unavailable'})`);
-        console.log(`Weekly: ${weekly} BTC (${weeklyAvailable ? 'available' : 'unavailable'})`);
-        console.log(`Monthly: ${monthly} BTC (${monthlyAvailable ? 'available' : 'unavailable'})`);
-
-
-        let suggestedOption = dailyAvailable ? 'daily' : weeklyAvailable ? 'weekly' : monthlyAvailable ? 'monthly' : null;
-
-        if (suggestedOption) {
-            console.log(`Based on the current minimum buy of ${minBuy} BTC, we recommend you go with a ${suggestedOption} buy`);
-        } else {
-            console.log(`Based on the current minimum buy of ${minBuy} BTC, the amount you've chosen is too small`);
-        }
+        const dailyAmount = bn.divide(monthlyAmount, 30, 'coin');
+        const dailySpend = bn.multiply(dailyAmount, buyPrice, 'fiat');
+        const dailyAvailable = bn.isGreaterThanOrEqualTo(dailyAmount, minBuy);
+        
+        const suggestedOption = dailyAvailable ? 'daily' : weeklyAvailable ? 'weekly' : monthlyAvailable ? 'monthly' : null;
 
         return {
-            buyPrice: format(buyPrice, 'fiat'),
-            minBuy: format(minBuy, 'coin'),
-            monthlySpend: format(monthlySpend, 'fiat'),
-            monthlyAmount: format(monthlyAmount, 'coin'),
+            buyPrice: bn.format(buyPrice, 'fiat'),
+            minBuy: bn.format(minBuy, 'coin'),
+            monthlySpend: bn.format(monthlySpend, 'fiat'),
+            monthlyAmount: bn.format(monthlyAmount, 'coin'),
 
             daily: {
-                amount: format(daily, 'coin'),
+                amount: bn.format(dailyAmount, 'coin'),
                 spend: dailySpend,
                 available: dailyAvailable
             },
             weekly: {
-                amount: format(weekly, 'coin'),
+                amount: bn.format(weeklyAmount, 'coin'),
                 spend: weeklySpend,
                 available: weeklyAvailable
             },
             monthly: {
-                amount: format(monthly, 'coin'),
+                amount: bn.format(monthlyAmount, 'coin'),
                 spend: monthlySpend,
                 available: monthlyAvailable
             },

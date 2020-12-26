@@ -1,5 +1,6 @@
 const api = require('./api');
 const db = require('./db');
+const bn = require('./big-number');
 
 const CONFIG = {
     AMOUNT: process.env.BUY_AMOUNT,
@@ -68,11 +69,11 @@ const buyViaMarket = async () => {
 
         const marketOrder = marketOrders[i];
 
-        const p = parseFloat(marketOrder.pricePerCoin);
-        const maxAmount = parseFloat(marketOrder.coinAmount);
-        const a = CONFIG.AMOUNT / p;
+        const p = marketOrder.pricePerCoin;
+        const maxAmount = marketOrder.coinAmount;
+        const a = bn.divide(CONFIG.AMOUNT, p, 'coin');
 
-        if (a <= maxAmount) {
+        if (bn.isLessThanOrEqualTo(a, maxAmount)) {
             price = p;
             amountToBuy = a;
             break;
@@ -111,11 +112,11 @@ const buyViaInstant = async () => {
         error: "no_instant_price"
     }
 
-    const price = parseFloat(instantPrice.buyPricePerCoin);
-    const minAmount = parseFloat(instantPrice.minBuy);
-    const amountToBuy = parseFloat(CONFIG.AMOUNT) / price;
+    const price = instantPrice.buyPricePerCoin;
+    const minAmount = instantPrice.minBuy;
+    const amountToBuy = bn.divide(CONFIG.AMOUNT, price, 'coin');
 
-    if (amountToBuy <= minAmount) return {
+    if (bn.isLessThanOrEqualTo(amountToBuy, minAmount)) return {
         error: "btc_amount_too_small"
     }
 
