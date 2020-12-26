@@ -45,7 +45,7 @@
                     <tr>
                         <th>Date</th>
                         <th>BTC Amount</th>
-                        <th>NGNT Cost</th>
+                        <th class="column-cost">NGNT Cost</th>
                         <th>Price per BTC</th>
                     </tr>
                 </thead>
@@ -54,7 +54,7 @@
                         <tr>
                             <td><%= summary.date %></td>
                             <td><%= summary.amount || '' %></td>
-                            <td><%= summary.cost || '' %></td>
+                            <td class="column-cost"><%= summary.cost || '' %></td>
                             <td><%= summary.price || '' %></td>
                         </tr>
                     <% }); %>
