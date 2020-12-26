@@ -74,14 +74,6 @@ const setupCollection = () => {
         .then(() => createByDateIndex());
 };
 
-const checkCollectionSetup = () => {
-    return client.query(q.Get(q.Collection(DB_COLLECTION_NAME)))
-      .then(() => null)
-      .catch(() => setupCollection());
-};
-
-
-
 const addSummaryToDatabase = (summary) => {
     return client.query(
         q.Create(
@@ -94,39 +86,61 @@ const addSummaryToDatabase = (summary) => {
 
 
 const getSummaryByDate = (date) => {
-    return checkCollectionSetup().then(() => {
-        return client.query(
-            q.Paginate(
-                q.Match(
-                    q.Index(DB_INDEX_SUMMARIES_BY_DATE), date
-                )
+    return client.query(
+        q.Paginate(
+            q.Match(
+                q.Index(DB_INDEX_SUMMARIES_BY_DATE), date
             )
-          )
-          .then((ret) => ret.data[0])
-          .catch((error) => null);
-    });  
+        )
+        )
+        .then((ret) => ret.data[0])
+        .catch((error) => null);
 };
 
 const getAllSummaries = () => {
-    return checkCollectionSetup().then(() => {
-        return client.query(
-            q.Paginate(
-                q.Match(
-                    q.Index(DB_INDEX_ALL_SUMMARIES)
-                ),
-                {
-                    size: 99999
-                }
-            )
+    return client.query(
+        q.Paginate(
+            q.Match(
+                q.Index(DB_INDEX_ALL_SUMMARIES)
+            ),
+            {
+                size: 99999
+            }
         )
-        .then((ret) => ret.data)
-        .catch((error) => []);
-    });  
+    )
+    .then((ret) => ret.data)
+    .catch((error) => []);
 };
 
 
 module.exports = {
     getSummaryByDate: getSummaryByDate,
     addSummaryToDatabase: addSummaryToDatabase,
-    getAllSummaries: getAllSummaries
+    getAllSummaries: getAllSummaries,
+    setupCollection: setupCollection,
+
+    test: () => {
+
+        return client.query(
+            q.CreateIndex({
+                name: 'all_summaries_reversed',
+                source: q.Collection(DB_COLLECTION_NAME),
+                values: [
+                    { field: ['data', 'summary_date'] },
+                    { field: ['data', 'error_market_order'] },
+                    { field: ['data', 'error_instant_order'] },
+                    { field: ['data', 'purchase_method'] },
+                    { field: ['data', 'purchase_amount'] },
+                    { field: ['data', 'purchase_price'] },
+                    { field: ['data', 'purchase_id'] },
+                    { field: ['ts'], reverse: true },
+                ],
+            })
+        )
+        .then((ret) => console.log(ret))
+        .catch((error) => console.log(error));
+
+
+
+    }
 }
