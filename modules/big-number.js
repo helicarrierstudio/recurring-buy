@@ -68,6 +68,8 @@ module.exports = {
     },
 
     average(arr, type) {
+        if (arr.length === 0) return 0;
+
         const count = new BigNumber(arr.length);
         const sum = BigNumber.sum.apply(null, arr);
 

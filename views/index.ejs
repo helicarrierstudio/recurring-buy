@@ -43,20 +43,18 @@
         </div>
     </header>
 
-    <main>
+    <main class="container">
 
-        <div class="container">
-            <section class="card">
-                <h2>Summary</h2>
-                <p>Frequency: <strong><%= CONFIG.FREQUENCY %></strong></p>
-                <p>Amount: <strong>₦<%= CONFIG.AMOUNT %> worth of Bitcoin</strong></p>
-                <br>
-                <p>Total Bitcoin Bought: <%= totalAmount %> BTC</p>
-                <p>Total Spent: ₦<%= totalCost %></p>
-                <p>Average Price: ₦<%= avergaePrice %> /BTC</p>
-                <p>Times Bought: <%= summaries.length %></p>
-            </section>
-        </div>
+        <section class="card">
+            <h2>Summary</h2>
+            <p>Frequency: <strong><%= CONFIG.FREQUENCY %></strong></p>
+            <p>Amount: <strong>₦<%= CONFIG.AMOUNT %> worth of Bitcoin</strong></p>
+            <br>
+            <p>Total Bought: <%= totalAmount %> BTC</p>
+            <p>Total Spent: ₦<%= totalCost %></p>
+            <p>Average Price: ₦<%= avergaePrice %> /BTC</p>
+            <p>Times Bought: <%= summaries.length %></p>
+        </section>
 
         <% if (summaries.length > 0) { %>
             <table>
@@ -79,11 +77,7 @@
                     <% }); %>
                 </tbody>
             </table>
-        <% } else { %>
-            <section class="card">
-                <p>You haven't bought anything yet. </p>
-            </section>
-        <% }%>
+        <% } %>
     </main>
 
 </body>
