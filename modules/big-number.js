@@ -1,8 +1,6 @@
-
 const BigNumber = require('bignumber.js');
 
 const round = (a, type) => {
-
     a = new BigNumber(a);
 
     const decimalPlaces = type === 'coin' ? 8 : 2;
@@ -11,17 +9,11 @@ const round = (a, type) => {
     a = a.decimalPlaces(decimalPlaces, roundingMode);
 
     return a.toFixed();
-
 };
 
-
-
 module.exports = {
-
     round,
-
     format(a, type) {
-
         a = round(a, type);
         a = new BigNumber(a);
 
@@ -37,9 +29,7 @@ module.exports = {
         };
 
         return a.toFormat(formatOptions);
-
     },
-
     add(a, b, type) {
         a = new BigNumber(a || 0);
         b = new BigNumber(b || 0);
@@ -48,7 +38,6 @@ module.exports = {
 
         return round(result, type);
     },
-
     multiply(a, b, type) {
         a = new BigNumber(a || 0);
         b = new BigNumber(b || 0);
@@ -57,7 +46,6 @@ module.exports = {
 
         return round(result, type);
     },
-
     divide(a, b, type) {
         a = new BigNumber(a || 0);
         b = new BigNumber(b || 0);
@@ -66,7 +54,6 @@ module.exports = {
 
         return round(result, type);
     },
-
     average(arr, type) {
         if (arr.length === 0) return 0;
 
@@ -77,20 +64,17 @@ module.exports = {
 
         return round(result, type);
     },
-
     isGreaterThanOrEqualTo(a, b) {
         a = new BigNumber(a || 0);
         b = new BigNumber(b || 0);
 
         return a.isGreaterThan(b) || a.isEqualTo(b);
     },
-
     isLessThanOrEqualTo(a, b) {
         a = new BigNumber(a || 0);
         b = new BigNumber(b || 0);
 
         return a.isLessThan(b) || a.isEqualTo(b);
     },
-
 };
 

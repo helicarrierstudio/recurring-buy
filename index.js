@@ -15,6 +15,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+function parseError(error) {
+
+    error = error.split(':')[0];
+
+    const errors = {
+        'no_market_orders': 'No market orders available to buy from',
+        'btc_amount_too_small': 'Your set amount is too small',
+        'failed_market_order': 'Failed market order',
+        'no_instant_price': 'Couldn\'t find BuyCoins price',
+        'failed_instant_order': 'Failed instant order',
+    };
+
+
+    return errors[error] || 'Unknown error';
+}
+
+
 app.get('/', async (req, res) => {
 
     const CONFIG = {
@@ -47,6 +64,10 @@ app.get('/', async (req, res) => {
             totalCost = bn.add( totalCost, cost, 'coin' );
 
             prices.push(price);
+        } else if (s[1] || s[2]) {
+            const instant_error = s[2];
+            const market_error = s[1];
+            summary.error = parseError(instant_error || market_error);
         }
 
         arr[index] = summary;

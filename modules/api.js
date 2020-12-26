@@ -118,7 +118,10 @@ module.exports = {
     
         return graphQLClient
             .request(query, variables)
-            .then((res) => res.postMarketOrder)
+            .then((res) => {
+                if (res.postMarketOrder) return res.postMarketOrder;
+                return Promise.reject();
+            })
             .catch((error) => {
                 const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
                 return Promise.reject(message);

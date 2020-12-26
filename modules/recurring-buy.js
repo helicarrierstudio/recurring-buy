@@ -151,9 +151,9 @@ module.exports = async () => {
 
     let result = await buyViaMarket();
     if (result.error) {
-        summary.error_market_order = `${result.error}:${result.message}`;
+        summary.error_market_order = `${result.error}:${result.message || ''}`;
         result = await buyViaInstant();
-        if (result.error) summary.error_instant_order = `${result.error}:${result.message}`;
+        if (result.error) summary.error_instant_order = `${result.error}:${result.message || ''}`;
     }
 
     if (result.purchase_method) {

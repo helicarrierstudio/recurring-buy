@@ -68,12 +68,19 @@
                 </thead>
                 <tbody>
                     <% summaries.forEach(function(summary) { %>
-                        <tr>
-                            <td><%= summary.date %></td>
-                            <td><%= summary.amount || '' %></td>
-                            <td class="column-cost"><%= '₦' + summary.cost || '' %></td>
-                            <td><%= summary.price || '' %></td>
-                        </tr>
+                        <% if (summary.amount) { %>
+                            <tr>
+                                <td><%= summary.date %></td>
+                                <td><%= summary.amount || '' %></td>
+                                <td class="column-cost"><%= summary.cost ? '₦' + summary.cost : '' %></td>
+                                <td><%= summary.price || '' %></td>
+                            </tr>
+                        <% } else if (summary.error) { %>
+                            <tr>
+                                <td><%= summary.date %></td>
+                                <td colspan="3"><%= summary.error %></td>
+                            </tr>
+                        <% } %>
                     <% }); %>
                 </tbody>
             </table>
