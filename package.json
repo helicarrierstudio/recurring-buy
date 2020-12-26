@@ -1,13 +1,12 @@
 {
   "name": "buycoins-recurring-buy",
   "version": "1.0.0",
-  "description": "",
+  "description": "Automatically spread your investment in crypto over a period of time",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "author": "",
+  "author": "Ire Aderinokun",
   "license": "ISC",
   "dependencies": {
     "bignumber.js": "^9.0.1",
