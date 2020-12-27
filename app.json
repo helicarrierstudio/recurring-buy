@@ -1,7 +1,7 @@
 {
   "name": "BuyCoins Recurring Buy",
   "description": "Automatically spread your investment in crypto over a period of time",
-  "repository": "https://github.com/ireade/buycoins-recurring-buy",
+  "repository": "https://github.com/buycoinsafrica/recurring-buy",
   "logo": "https://buycoins-recurring-buy.herokuapp.com/images/icon-512.png",
   "keywords": [
       "node", 
