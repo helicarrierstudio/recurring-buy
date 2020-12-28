@@ -27,7 +27,6 @@ function parseError(error) {
         'failed_instant_order': 'Failed instant order',
     };
 
-
     return errors[error] || 'Unknown error';
 }
 
