@@ -64,3 +64,10 @@ Next, create a new job using the following settings:
 ![](./public/images/heroku-scheduler.png)
 
 Note: Make sure the job is set to run every day, regardless of your `BUY_FREQUENCY`.
+
+
+### 6. (Optional) Get updates
+
+If you want to get updates on this project as we continue to improve it, you'll need to create a fork of this repository to your Github account. 
+
+Once you've done that, setup deployments to your Heroku application from your forked project. 
