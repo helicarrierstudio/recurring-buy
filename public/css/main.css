@@ -6,7 +6,7 @@
     --fw-normal: 400;
     --fw-bold: 600;
 
-    --container-width: 700px;
+    --container-width: 600px;
 }
 
 html {
@@ -24,11 +24,16 @@ body {
 
 /* Typography */
 
+h1 {
+    color: #fff;
+    font-weight: var(--fw-bold);
+    font-size: 2.2rem;
+}
+
 h2 {
     color: #000;
     font-weight: var(--fw-bold);
-    font-size: 1.8rem;
-    margin-bottom: 1em;
+    font-size: 1.6rem;
 }
 
 h3 {
@@ -64,11 +69,48 @@ code {
     margin-left: auto;
 }
 
+.container-fw {
+    width: 100%;
+    max-width: var(--container-width);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@media (min-width: 600px) {
+    .container-fw {
+        width: 90%;
+    }
+}
+
 .card {
     background-color: #fff;
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    padding: 20px;
+    padding: 30px 20px;
+    
+}
+
+.callout {
+    background-image: linear-gradient(-269deg, #B78FFF 0%, #966FDB 100%);
+    border-radius: 8px;
+    padding: 35px 25px;
+    color: #fff;
+    text-align: center;
+}
+
+.callout h2 {
+    color: #fff;
+}
+
+.callout ul {
+    max-width: 350px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.callout ul li {
+    display: flex;
+    justify-content: space-between;
 }
 
 #site-header {
@@ -96,8 +138,8 @@ main {
 
 @media (min-width: 700px) {
     main {
-        margin-top: 100px;
-        margin-bottom: 100px;
+        margin-top: 60px;
+        margin-bottom: 60px;
     }
 }
 
@@ -162,7 +204,7 @@ table td:last-of-type {
 /* Form */
 
 form {
-    margin: 1em 0 2em;
+    margin-top: 2em;
 }
 
 form label {
@@ -171,24 +213,30 @@ form label {
     margin-bottom: 0.5em;
 }
 
-form input,
-form button {
-    height: 40px;
-    padding: 0 1em;
+.input-group {
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    overflow: hidden;
+    display: flex;
     border-radius: 5px;
 }
 
-form input {
-    border: 1px solid var(--color-border);
-    background-color: var(--color-bg);
+.input-group input,
+.input-group button {
+    height: 50px;
+    padding: 0 1em;
+    border: none;
+    background-color: transparent;
     font-weight: var(--fw-normal);
 }
 
-form button {
-    border: 1px solid var(--color-primary);
-    background-color: #fff;
-    color: var(--color-primary);
-    font-weight: var(--fw-bold);
+.input-group input {
+    flex: 1;
+}
+
+.input-group button {
+    background-color: var(--color-primary);
+    color: #fff;
     cursor: pointer;
 }
 

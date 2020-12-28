@@ -35,156 +35,81 @@
     <header id="site-header">
         <div class="container">
             <h1>
-                <a href="/">
-                    <img src="/images/recurring.svg" class="logo" alt="">
-                </a>
+                Setup
             </h1>
         </div>
     </header>
 
     <main class="container">
         <section class="card">
-            <h2>What is this?</h2>
-            <p>This is an open-source project which you can use to spread your investment in Bitcoin over a period of time. Make automated purchases of Bitcoin daily, weekly, or monthly!</p>
-            <p><a href="https://en.wikipedia.org/wiki/Dollar_cost_averaging">Dollar cost averaging (DCA)</a> is an investment strategy that aims to reduce the impact of volatility on large purchases of financial assets such as equities. By dividing the total sum to be invested in the market (e.g., ₦100,000) into equal amounts put into the market at regular intervals (e.g., ₦1,000 per week over 100 weeks), DCA seeks to reduce the risk of incurring a substantial loss resulting from investing the entire lump sum just before a fall in the market.</p>
+            <h2>Need help deciding on your daily/weekly/monthly spend?</h2>
+
+            <p>In order to use this project, you'll need to specify how often you want to buy Bitcoin, and how much you want to spend on each purchase.</p>
+
+            <form action="/setup#form" id="form" method="post">
+                <label for="monthly_spend">How much do you want to spend (in Naira) each month?</label>
+
+                <div class="input-group">
+                    <input type="number" id="monthly_spend" name="monthly_spend" 
+                           value="<%= setupOptions ? setupOptions.monthly.spend : '15000' %>">
+                    <button type="submit">Calculate</button>
+                </div>
+            </form>
+
+            <% if (setupOptions) { %>
+
+                <br><br>
+
+                <p>The current price per Bitcoin on BuyCoins is <strong>₦<%= setupOptions.buyPrice %> per BTC</strong>. With ₦<%= setupOptions.monthlySpend %>, you can buy <%= setupOptions.monthlyAmount %> BTC each month.</p>
+                <br>
+
+                <% if (setupOptions.suggestedOption) { %>
+                    <p>Use any of the following options below when setting up the environemnt variables on Heroku.</p>
+                    <br>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th><code>BUY_FREQUENCY</code></th>
+                                <th><code>BUY_AMOUNT</code></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (setupOptions.daily.available) { %>
+                                <tr>
+                                    <td>Buy daily</td>
+                                    <td><code>DAILY</code></td>
+                                    <td><code><%= setupOptions.daily.spend %></code></td>
+                                </tr>
+                            <% } %>
+                            <% if (setupOptions.weekly.available) { %>
+                                <tr>
+                                    <td>Buy once a week</td>
+                                    <td><code>WEEKLY_<%= new Date().getDay() %></code></td>
+                                    <td><code><%= setupOptions.weekly.spend %></code></td>
+                                </tr>
+                            <% } %>
+                            <% if (setupOptions.monthly.available) { %>
+                                <tr>
+                                    <td>Buy once a month</td>
+                                    <td><code>MONTHLY_<%= new Date().getDate() > 29 ? 29 : new Date().getDate() %></code></td>
+                                    <td><code><%= setupOptions.monthly.spend %></code></td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+
+                <% } else { %>
+
+                    <p>Unfortunately, the current minimum buy on BuyCoins is <%= setupOptions.minBuy %> BTC. The amount of BTC you can purchase with ₦<%= setupOptions.monthlySpend %> is too small. Please try a larger amount.</p>
+
+                <% } %>
+
+            <% } %>
+
+
         </section>
 
-        <section class="card">
-            <h2>What you'll need</h2>
-            <ul>
-                <li>A <a href="https://buycoins.africa/">BuyCoins</a> account, with access to the API (see below)</li>
-                <li>A <a href="https://heroku.com">Heroku</a> account</li>
-                <li>A <a href="https://fauna.com">Fauna DB</a> account</li>
-                <li>Basic knwoledge of how to use these tools</li>
-            </ul>
-        </section>
-
-        <section class="card">
-            <h2>Setup</h2>
-
-            <details open>
-                <summary>1. Get access to the BuyCoins API</summary>
-                <div>
-                    <p>You'll need access to the <a href="http://developers.buycoins.africa/">BuyCoins API</a> in order to make automatic purchases. To apply for access, send an email to <a href="mailto:support@buycoins.africa">support@buycoins.africa</a> with the email address attached to your BuyCoins and a link to this project.</p>
-                    <p>Once you have access, go to your <a href="https://buycoins.africa/settings/api">API Settings</a> page. Generate and copy your public and secret keys. These keys will be used as the <code>BUYCOINS_API_PUBLIC</code> and <code>BUYCOINS_API_SECRET</code> environment variables on Heroku.</p>
-                </div>
-            </details>
-
-            <details>
-                <summary>2. Create a Fauna database</summary>
-                <div>
-                    <p>Sign up for an account with <a href="https://fauna.com">Fauna DB</a> and create a database (you can name it anything you want).</p>
-                    <p>Under your database security settings, create a new Key with the <strong>admin</strong> role and copy your generated secret key. This key will be used as the <code>FAUNA_DB_SECRET</code> environment variable on Heroku.</p>
-                    <p><img src="/images/fauna-db.png" alt=""></p>
-                </div>
-            </details>
-
-            <details <%= !!setupOptions ? 'open' : '' %>>
-                <summary>3. Decide on your daily/weekly/monthly spend</summary>
-                <div>
-                    <p>Next, you'll need to specify how often you want to buy Bitcoin, and how much you want to spend on each purchase. You do this by setting the following environment variables:</p>
-                    <br>
-                    <p>
-                        <code>BUY_FREQUENCY</code><br>
-                        <ul>
-                            <li><code>DAILY</code> - if you want to buy every day</li>
-                            <li><strong>WEEKLY_[1-7]</strong> - if you want to buy once a week. e.g. <code>WEEKLY_1</code> to buy every Monday</li>
-                            <li><strong>MONTHLY_[1-29]</strong> - if you want to buy once a month. e.g. <code>MONTHLY_5</code> to buy on the 5th day of each month</li>
-                        </ul>
-                    </p>
-                    <br>
-                    <p>
-                        <code>BUY_AMOUNT</code><br>
-                        The amount (in Naira) you want to purchase at each frequency.
-                    </p>
-                    <br>
-                    <br>
-                    <h3>Need help?</h3>
-                    <p>If you need help choosing, use the form below. </p>
-
-                    <form action="/setup#form" id="form" method="post">
-                        <label for="monthly_spend">How much do you want to spend (in Naira) each month?</label>
-                        <input type="number" id="monthly_spend" name="monthly_spend" value="15000">
-
-                        <button type="submit">Calculate</button>
-                    </form>
-
-                    <% if (setupOptions) { %>
-
-                        <p>The current price per Bitcoin on BuyCoins is <strong>₦<%= setupOptions.buyPrice %> per BTC</strong>. With ₦<%= setupOptions.monthlySpend %>, you can buy <%= setupOptions.monthlyAmount %> BTC each month.</p>
-
-                        <% if (setupOptions.suggestedOption) { %>
-                            <br>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Description</th>
-                                        <th><code>BUY_FREQUENCY</code></th>
-                                        <th><code>BUY_AMOUNT</code></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (setupOptions.daily.available) { %>
-                                        <tr>
-                                            <td>Buy daily</td>
-                                            <td><code>DAILY</code></td>
-                                            <td><code><%= setupOptions.daily.spend %></code></td>
-                                        </tr>
-                                    <% } %>
-                                    <% if (setupOptions.weekly.available) { %>
-                                        <tr>
-                                            <td>Buy once a week</td>
-                                            <td><code>WEEKLY_<%= new Date().getDay() %></code></td>
-                                            <td><code><%= setupOptions.weekly.spend %></code></td>
-                                        </tr>
-                                    <% } %>
-                                    <% if (setupOptions.monthly.available) { %>
-                                        <tr>
-                                            <td>Buy once a month</td>
-                                            <td><code>MONTHLY_<%= new Date().getDate() > 29 ? 29 : new Date().getDate() %></code></td>
-                                            <td><code><%= setupOptions.monthly.spend %></code></td>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-
-                        <% } else { %>
-
-                            <p>Unfortunately, the current minimum buy on BuyCoins is <%= setupOptions.minBuy %> BTC. The amount of BTC you can purchase with ₦<%= setupOptions.monthlySpend %> is too small. Please try a larger amount.</p>
-
-                        <% } %>
-
-                    <% } %>
-                </div>
-            </details>
-
-            <details>
-                <summary>4. Deploy to Heroku and add environment variables</summary>
-                <div>
-                    <p>
-                        <a href="https://heroku.com/deploy?template=https://github.com/buycoinsafrica/recurring-buy">
-                            <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku">
-                        </a>
-                    </p>
-                    <p>When deploying, you'll need to add the environment variables from the previous steps to your new app.</p>
-                    <p><img src="/images/env.png" alt=""></p>
-                </div>
-            </details>
-
-            <details>
-                <summary>5. Setup Heroku Scheduler</summary>
-                <div>
-                    <p>Finally, go to your Heroku project "Resources" tab and click the Heroku Scheduler Add-on.</p>
-                    <p>Next, create a new job using the following settings:</p>
-                    <ul>
-                        <li>Schedule: Every day at.. (any time of your choosing)</li>
-                        <li>Run Command: <code>recurringBuy</code></li>
-                    </ul>
-                    <p><img src="/images/heroku-scheduler.png" alt=""></p>
-                    <p>Note: Make sure the job is set to run every day, regardless of your <code>BUY_FREQUENCY</code>.</p>
-                </div>
-            </details>
-        </section>
     </main>
 </body>
 </html>
