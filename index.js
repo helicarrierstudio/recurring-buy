@@ -21,7 +21,7 @@ function parseError(error) {
 
     const errors = {
         'no_market_orders': 'No market orders available to buy from',
-        'btc_amount_too_small': 'Your set amount is too small',
+        'btc_amount_too_small': 'Purchase unsuccessful',
         'failed_market_order': 'Failed market order',
         'no_instant_price': 'Couldn\'t find BuyCoins price',
         'failed_instant_order': 'Failed instant order',
@@ -77,6 +77,7 @@ app.get('/', async (req, res) => {
     totalAmount = bn.format(totalAmount, 'coin');
     totalCost = bn.format(totalCost, 'fiat');
     avergaePrice = bn.format( bn.average(prices, 'fiat'), 'fiat' );
+    timesBought = prices.length;
 
 
     res.render('index', { 
@@ -84,7 +85,8 @@ app.get('/', async (req, res) => {
         summaries,
         totalAmount,
         totalCost,
-        avergaePrice
+        avergaePrice,
+        timesBought
     });
 });
 
