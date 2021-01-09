@@ -1,4 +1,3 @@
-
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -6,6 +5,7 @@ const bodyParser = require('body-parser');
 const api = require('./modules/api');
 const db = require('./modules/db');
 const bn = require('./modules/big-number');
+const recurringBuy = require('./modules/recurring-buy');
 
 app.set('port', (process.env.PORT || 5000));
 app.set('view engine', 'ejs');
@@ -153,8 +153,32 @@ app.post('/setup', async (req, res) => {
 
 });
 
-app.get('/welcome', (req, res) =>  {
-    res.render('welcome');
+app.get('/buy', (req, res) =>  {
+    res.render('buy', { result: null });
+});
+
+
+
+app.post('/buy', async (req, res) =>  {
+
+    if (req.body.code === process.env.SECURITY_CODE) {
+        const summary = await recurringBuy(true);
+        let result;
+
+        if (summary.error_market_order) result = `Error: ${parseError(summary.error_market_order)}`
+        else if (summary.error_instant_order) result = `Error: ${parseError(summary.error_instant_order)}`
+        else {
+            const amount = bn.format(summary.purchase_amount, 'coin');
+            const price = bn.format(summary.purchase_price, 'coin');
+            result = `Bought ${amount} BTC at a price of ₦${price}/BTC!`;
+        }
+
+        res.render('buy', { result });
+
+    } else {
+        res.render('buy', { result: 'Security code incorrect' });
+    }
+    
 });
 
 app.listen(app.get('port'), function () {

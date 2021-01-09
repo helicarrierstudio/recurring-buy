@@ -1,0 +1,49 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Buy | BuyCoins Recurring Buy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="icon" href="/favicon.ico">
+</head>
+<body>
+    <header id="site-header">
+        <div class="container">
+            <h1>
+                <a href="/">
+                    <img src="/images/recurring.svg" class="logo" alt="BuyCoins Recurring Buy">
+                </a>
+            </h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2>Instant Buy</h2>
+            <p>Want to make a purchase now? Enter your security code (environment variable <code>SECURITY_CODE</code>) to buy your set amount.</p>
+
+            <form action="/buy" id="form" method="post">
+                <label for="code">Security code</label>
+
+                <div class="input-group">
+                    <input type="text" id="code" name="code">
+                    <button type="submit">Buy</button>
+                </div>
+            </form>
+
+            <% if (result) { %>
+                <br>
+                <p><%= result %></p>
+            <% } %>
+        </section>
+
+    </main>
+</body>
+</html>

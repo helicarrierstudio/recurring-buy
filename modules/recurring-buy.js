@@ -16,7 +16,7 @@ const getTodaysDate = () => {
     return `${year}-${month}-${day}`;
 };
 
-const checkIfShouldBuyToday = async () => {
+const checkIfShouldBuyToday = async (allowMultipeBuyOnDay) => {
 
     const today = new Date();
     const frequency_period = CONFIG.FREQUENCY.split('_')[0];
@@ -41,7 +41,7 @@ const checkIfShouldBuyToday = async () => {
             break;
     }
 
-    if (shouldBuyToday) {
+    if (!allowMultipeBuyOnDay && shouldBuyToday) {
         const date = getTodaysDate();
         const summary = await db.getSummaryByDate(date); 
 
@@ -139,11 +139,11 @@ const buyViaInstant = async () => {
 };
 
 
-module.exports = async () => {
+module.exports = async (allowMultipeBuyOnDay) => {
 
     if (!CONFIG.AMOUNT || !CONFIG.FREQUENCY) return console.error("missing configuration");
 
-    if ( !(await checkIfShouldBuyToday()) ) return;
+    if ( !(await checkIfShouldBuyToday(allowMultipeBuyOnDay)) ) return;
 
     const summary = {
         summary_date: getTodaysDate()
@@ -164,5 +164,7 @@ module.exports = async () => {
     }
 
     db.addSummaryToDatabase(summary);
+
+    return summary;
 
 };
