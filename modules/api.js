@@ -93,33 +93,41 @@ module.exports = {
             });
     },
 
-    postMarketOrder: (coinAmount) => {
+    postProMarketOrder: (quantity) => {
 
         const query = `
-            mutation postMarketOrder($cryptocurrency: Cryptocurrency, $orderSide: OrderSide!, $coinAmount: BigDecimal!) {
-                postMarketOrder(cryptocurrency: $cryptocurrency, orderSide: $orderSide, coinAmount: $coinAmount) {
+            mutation postProMarketOrder($pair: CryptocurrencyPair, $quantity: BigDecimal!, $side: OrderSide!) {
+                postProMarketOrder(pair: $pair, quantity: $quantity, side: $side){
                     id
-                    createdAt
-                    cryptocurrency
-                    coinAmount
-                    pricePerCoin
-                    priceType
-                    staticPrice
-                    dynamicExchangeRate
+                    pair
+                    price
+                    side
+                    status
+                    timeInForce
+                    orderType
+                    fees
+                    filled
+                    total
+                    initialBaseQuantity
+                    initialQuoteQuantity
+                    remainingBaseQuantity
+                    remainingQuoteQuantity
+                    meanExecutionPrice
+                    engineMessage
                 }
             }
-        `;
+            `;
     
         const variables = {
-            cryptocurrency: "bitcoin",
-            orderSide: "sell",
-            coinAmount,
+            pair: "btc_usdt",
+            side: "sell",
+            quantity,
         };
     
         return graphQLClient
             .request(query, variables)
             .then((res) => {
-                if (res.postMarketOrder) return res.postMarketOrder;
+                if (res.postProMarketOrder) return res.postProMarketOrder;
                 return Promise.reject();
             })
             .catch((error) => {
