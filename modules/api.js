@@ -50,47 +50,49 @@ module.exports = {
             });
     },
 
-    getMarketOrders: () => {
+    getMarketOrders: (pair) => {
 
-        const query = `
-            query getMarketBook($cryptocurrency: Cryptocurrency) {
-                getMarketBook(cryptocurrency: $cryptocurrency) {
+        import {Orderbook} from 'public-protos-js/proto/orderbook_socket/v1/orderbook_pb';
         
-                    orders(first: 10) {
-                      
-                      nodes {
-                        id
-                        coinAmount
-                        pricePerCoin
-                        side
-    
-                      }
-                    }
-                    
-                    
-                  }
-            }
-        `;
-    
-        const variables = {
-            cryptocurrency: "bitcoin",
-        }
-    
-        return graphQLClient
-            .request(query, variables)
-            .then((res) => {
-                const orders = res.getMarketBook.orders.nodes;
-                const sellOrders = orders.filter((o) => o.side === 'sell');
-                sellOrders.sort((a, b) => {
-                    return parseFloat(a.pricePerCoin) - parseFloat(b.pricePerCoin);
-                });
-                return sellOrders; 
-            })
-            .catch((error) => {
-                const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
-                console.error(message);
-                return [];
+        try {
+            const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
+
+            const orderbookSocket = new WebSocket(baseUrl);
+            orderbookSocket.binaryType = 'arraybuffer';
+
+            window.orderbookSocket.addEventListener('open', () => {
+            console.log('Disconnected from orderbook WebSocket API');
             });
+
+            window.orderbookSocket.addEventListener('close', () => {
+            console.log('Disconnected from orderbook WebSocket API. Reconnect will be attempted in 1 second.');
+            setTimeout(function() {
+                getMarketOrders(pair);
+            }, 1000);
+            });
+
+            window.orderbookSocket.addEventListener('message', ({ data }) => {
+            console.log('Order Book update received');
+            const market = Orderbook.deserializeBinary(data).toObject();
+            console.log(market);
+                    });
+        
+            // const variables = {
+            //     pair: "BTC/USDT",
+            // }
+        
+            const orders = market;
+            const sellOrders = orders.filter((o) => o.side === 'sell');
+            sellOrders.sort((a, b) => {
+                return parseFloat(a.pricePerCoin) - parseFloat(b.pricePerCoin);
+                });
+            return sellOrders; 
+        } catch (error) {
+            const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
+            console.error(message);
+            return [];
+        };
+        
     },
 
     postProMarketOrder: (quantity) => {

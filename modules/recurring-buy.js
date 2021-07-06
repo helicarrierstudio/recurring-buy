@@ -86,7 +86,7 @@ const buyViaMarket = async () => {
     }
 
     try {
-        const marketOrder = await api.postMarketOrder(amountToBuy);
+        const marketOrder = await api.postProMarketOrder(amountToBuy);
         return {
             purchase_method: "market",
             purchase_amount: marketOrder.coinAmount,
