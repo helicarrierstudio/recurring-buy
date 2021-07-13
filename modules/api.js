@@ -50,76 +50,86 @@ module.exports = {
             });
     },
 
-    getMarketOrders: () => {
+    getMarketOrders: (pair) => {
 
-        const query = `
-            query getMarketBook($cryptocurrency: Cryptocurrency) {
-                getMarketBook(cryptocurrency: $cryptocurrency) {
+        import {Orderbook} from 'public-protos-js/proto/orderbook_socket/v1/orderbook_pb';
         
-                    orders(first: 10) {
-                      
-                      nodes {
-                        id
-                        coinAmount
-                        pricePerCoin
-                        side
-    
-                      }
-                    }
-                    
-                    
-                  }
-            }
-        `;
-    
-        const variables = {
-            cryptocurrency: "bitcoin",
-        }
-    
-        return graphQLClient
-            .request(query, variables)
-            .then((res) => {
-                const orders = res.getMarketBook.orders.nodes;
-                const sellOrders = orders.filter((o) => o.side === 'sell');
-                sellOrders.sort((a, b) => {
-                    return parseFloat(a.pricePerCoin) - parseFloat(b.pricePerCoin);
-                });
-                return sellOrders; 
-            })
-            .catch((error) => {
-                const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
-                console.error(message);
-                return [];
+        try {
+            const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
+
+            const orderbookSocket = new WebSocket(baseUrl);
+            orderbookSocket.binaryType = 'arraybuffer';
+
+            window.orderbookSocket.addEventListener('open', () => {
+            console.log('Disconnected from orderbook WebSocket API');
             });
+
+            window.orderbookSocket.addEventListener('close', () => {
+            console.log('Disconnected from orderbook WebSocket API. Reconnect will be attempted in 1 second.');
+            setTimeout(function() {
+                getMarketOrders(pair);
+            }, 1000);
+            });
+
+            window.orderbookSocket.addEventListener('message', ({ data }) => {
+            console.log('Order Book update received');
+            const market = Orderbook.deserializeBinary(data).toObject();
+            console.log(market);
+                    });
+        
+            // const variables = {
+            //     pair: "BTC/USDT",
+            // }
+        
+            const orders = market;
+            const sellOrders = orders.filter((o) => o.side === 'sell');
+            sellOrders.sort((a, b) => {
+                return parseFloat(a.pricePerCoin) - parseFloat(b.pricePerCoin);
+                });
+            return sellOrders; 
+        } catch (error) {
+            const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
+            console.error(message);
+            return [];
+        };
+        
     },
 
-    postMarketOrder: (coinAmount) => {
+    postProMarketOrder: (quantity) => {
 
         const query = `
-            mutation postMarketOrder($cryptocurrency: Cryptocurrency, $orderSide: OrderSide!, $coinAmount: BigDecimal!) {
-                postMarketOrder(cryptocurrency: $cryptocurrency, orderSide: $orderSide, coinAmount: $coinAmount) {
+            mutation postProMarketOrder($pair: CryptocurrencyPair, $quantity: BigDecimal!, $side: OrderSide!) {
+                postProMarketOrder(pair: $pair, quantity: $quantity, side: $side){
                     id
-                    createdAt
-                    cryptocurrency
-                    coinAmount
-                    pricePerCoin
-                    priceType
-                    staticPrice
-                    dynamicExchangeRate
+                    pair
+                    price
+                    side
+                    status
+                    timeInForce
+                    orderType
+                    fees
+                    filled
+                    total
+                    initialBaseQuantity
+                    initialQuoteQuantity
+                    remainingBaseQuantity
+                    remainingQuoteQuantity
+                    meanExecutionPrice
+                    engineMessage
                 }
             }
-        `;
+            `;
     
         const variables = {
-            cryptocurrency: "bitcoin",
-            orderSide: "sell",
-            coinAmount,
+            pair: "btc_usdt",
+            side: "sell",
+            quantity,
         };
     
         return graphQLClient
             .request(query, variables)
             .then((res) => {
-                if (res.postMarketOrder) return res.postMarketOrder;
+                if (res.postProMarketOrder) return res.postProMarketOrder;
                 return Promise.reject();
             })
             .catch((error) => {
