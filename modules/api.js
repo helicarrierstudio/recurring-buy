@@ -55,7 +55,7 @@ module.exports = {
     getMarketOrders: () => {
         
         try {
-            const baseUrl = `wss://markets.buycoins.tech/ws?pair=BTC/USDT`;
+            const baseUrl = `wss://markets.buycoins.tech/ws?pair=BTC/NGNT`;
 
             const orderbookSocket = new WebSocket(baseUrl);
             orderbookSocket.binaryType = 'arraybuffer';
