@@ -56,13 +56,13 @@ const checkIfShouldBuyToday = async (allowMultipeBuyOnDay) => {
 
 const buyViaMarket = async () => {
 
-    let currencyPair;
+    // let currencyPair;
 
-    if (currencyPair == "") {
-        currencyPair = "BTC/USDT"
-    }
+    // if (currencyPair == "") {
+    //     currencyPair = "BTC/USDT"
+    // }
 
-    const marketOrders = await api.getMarketOrders(currencyPair);
+    const marketOrders = await api.getMarketOrders();
 
     if (marketOrders.length === 0) return {
         error: "no_market_orders"

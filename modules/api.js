@@ -1,4 +1,6 @@
 const graphqlRequest = require('graphql-request');
+const OrderBook = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb');
+//const OrderBook = order.Orderbook();
 
 let secrets = {
     BUYCOINS_API_PUBLIC: process.env.BUYCOINS_API_PUBLIC,
@@ -50,12 +52,10 @@ module.exports = {
             });
     },
 
-    getMarketOrders: (pair) => {
-
-        import {Orderbook} from 'public-protos-js/proto/orderbook_socket/v1/orderbook_pb';
+    getMarketOrders: () => {
         
         try {
-            const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
+            const baseUrl = `wss://markets.buycoins.tech/ws?pair=BTC/USDT`;
 
             const orderbookSocket = new WebSocket(baseUrl);
             orderbookSocket.binaryType = 'arraybuffer';
@@ -73,7 +73,7 @@ module.exports = {
 
             window.orderbookSocket.addEventListener('message', ({ data }) => {
             console.log('Order Book update received');
-            const market = Orderbook.deserializeBinary(data).toObject();
+            const market = OrderBook.deserializeBinary(data).toObject();
             console.log(market);
                     });
         
