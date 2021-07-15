@@ -18,8 +18,5 @@
     "graphql": "^15.4.0",
     "graphql-request": "^3.3.0",
     "public-protos-js": "git+https://github.com/buycoinsafrica/protos-js.git"
-  },
-  "engines": {
-    "node": "16.4.2"
-}
+  }
 }
