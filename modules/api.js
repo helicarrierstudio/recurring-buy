@@ -1,6 +1,6 @@
 const graphqlRequest = require('graphql-request');
-const OrderBook = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb');
-//const OrderBook = order.Orderbook();
+const order = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb');
+const OrderBook = order.Orderbook;
 
 let secrets = {
     BUYCOINS_API_PUBLIC: process.env.BUYCOINS_API_PUBLIC,
