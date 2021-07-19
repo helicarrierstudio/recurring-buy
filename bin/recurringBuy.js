@@ -2,6 +2,11 @@
 
 "use strict";
 
-const recurringBuy = require('../modules/recurring-buy');
+const { getMarketOrders } = require('../modules/api');
 
-recurringBuy();
+function handleResult(orders) {
+  console.log('HERE');
+  console.log(orders);
+}
+
+getMarketOrders("BTC/NGNT", handleResult);

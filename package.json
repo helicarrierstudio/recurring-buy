@@ -17,6 +17,7 @@
     "faunadb": "^4.0.0",
     "graphql": "^15.4.0",
     "graphql-request": "^3.3.0",
-    "public-protos-js": "git+https://github.com/buycoinsafrica/public-protos-js.git"
+    "public-protos-js": "git+https://github.com/buycoinsafrica/public-protos-js.git",
+    "ws": "^7.5.3"
   }
 }
