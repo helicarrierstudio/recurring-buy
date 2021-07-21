@@ -99,9 +99,7 @@ async function Market(marketOrders) {
     }
         console.log(summary);
         db.addSummaryToDatabase(summary);
-        return {
-            summary
-        }
+        return summary;
 
     } catch (error) {
         console.log("failed_market_order");
@@ -112,11 +110,11 @@ async function Market(marketOrders) {
     }
 }
 
-const buyViaMarket = async () => {
+// const buyViaMarket = async () => {
 
     
  
-};
+// };
 
 const buyViaInstant = async () => {
     
@@ -166,7 +164,6 @@ module.exports = async (allowMultipeBuyOnDay) => {
 
     const orderbookSocket = new WebSocket(baseUrl);
     orderbookSocket.binaryType = 'arraybuffer';
-    console.log('GOT HERE');
 
     orderbookSocket.addEventListener('open', async () => {
     console.log('Connected to orderbook WebSocket API');
@@ -179,7 +176,7 @@ module.exports = async (allowMultipeBuyOnDay) => {
     const orders = market.asksList;
     var bestPrice;
     if (orders.length === 0) {
-        console.log('We are done here');
+        console.log('No market orders');
     } else {
         bestPrice = orders.sort((a, b) => {
         return parseFloat(a.price) - parseFloat(b.price);
