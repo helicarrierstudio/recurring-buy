@@ -147,6 +147,56 @@ module.exports = {
       });
   },
 
+  getProOrders: () => {
+    const query = `
+    query getProOrders($pair: Pair!, $status: ProOrderStatus!, $side: OrderSide!) {
+    getProOrders(pair: $pair, status: $status, side: $side) {
+          edges {
+            node {
+              id
+              pair
+              price
+              side
+              status
+              timeInForce
+              orderType
+              fees
+              filled
+              total
+              initialBaseQuantity
+              initialQuoteQuantity
+              remainingBaseQuantity
+              remainingQuoteQuantity
+              meanExecutionPrice
+              engineMessage
+            }
+          }
+        }
+      }`;
+
+    const variables = {
+      pair: 'btc_ngnt', 
+      side: 'buy',
+      status: 'successful',
+    };
+
+    return graphQLClient
+      .request(query, variables)
+      .then((res) => {
+        if (res.getProOrders) return res.getProOrders;
+        return Promise.reject();
+      })
+      .catch((error) => {
+          console.log(error);
+        const message =
+          error.response &&
+          error.response.errors &&
+          error.response.errors[0] &&
+          error.response.errors[0].message;
+        return Promise.reject(message);
+      });
+  },
+
   placeInstantOrder: (coin_amount, price) => {
     const query = `
             mutation buy($cryptocurrency: Cryptocurrency, 

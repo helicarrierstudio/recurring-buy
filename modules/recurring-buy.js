@@ -5,15 +5,11 @@ const order = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb')
 const OrderBook = order.Orderbook;
 const WebSocket = require('ws');
 
-// const CONFIG = {
-//     AMOUNT: process.env.BUY_AMOUNT,
-//     FREQUENCY: process.env.BUY_FREQUENCY,
-// };
-
 const CONFIG = {
-    AMOUNT: 10000,
-    FREQUENCY: "DAILY"
+    AMOUNT: process.env.BUY_AMOUNT,
+    FREQUENCY: process.env.BUY_FREQUENCY,
 };
+
 
 const getTodaysDate = () => {
     const d = new Date();
@@ -89,15 +85,15 @@ async function Market(marketOrders) {
         error: "btc_amount_too_small"
     }
     try {
-        const marketOrder = await api.postProMarketOrder('10000');
+        const marketOrder = await api.postProMarketOrder(CONFIG.AMOUNT);
         console.log(marketOrder);
               
         const summary = {
             purchase_date: getTodaysDate(),
             purchase_method: "market",
-            purchase_amount: marketOrder.quantity,
-            purchase_price: marketOrder.price,
-            purchase_id: marketOrder.pair
+            purchase_amount: amountToBuy,
+            purchase_price: marketOrder.initialQuoteQuantity,
+            purchase_pair: marketOrder.pair
     }
         console.log(summary);
         db.addSummaryToDatabase(summary);
