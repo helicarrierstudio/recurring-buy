@@ -1,1 +1,1 @@
-web: node bin/recurringBuy.js
+web: node index.js

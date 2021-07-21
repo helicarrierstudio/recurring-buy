@@ -72,10 +72,12 @@ async function Market(marketOrders) {
         const p = marketOrder.price;
         const maxAmount = marketOrder.quantity;
         const a = bn.divide(CONFIG.AMOUNT, p, 'coin');
+        console.log(a)
 
         if (bn.isLessThanOrEqualTo(a, maxAmount)) {
             price = p;
             amountToBuy = a;
+            console.log('Gotten amount', amountToBuy)
             break;
         }
 
