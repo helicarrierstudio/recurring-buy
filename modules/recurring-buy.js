@@ -1,10 +1,18 @@
 const api = require('./api');
 const db = require('./db');
 const bn = require('./big-number');
+const order = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb');
+const OrderBook = order.Orderbook;
+const WebSocket = require('ws');
+
+// const CONFIG = {
+//     AMOUNT: process.env.BUY_AMOUNT,
+//     FREQUENCY: process.env.BUY_FREQUENCY,
+// };
 
 const CONFIG = {
-    AMOUNT: process.env.BUY_AMOUNT,
-    FREQUENCY: process.env.BUY_FREQUENCY,
+    AMOUNT: 10000,
+    FREQUENCY: "DAILY"
 };
 
 const getTodaysDate = () => {
@@ -52,22 +60,12 @@ const checkIfShouldBuyToday = async (allowMultipeBuyOnDay) => {
     return shouldBuyToday;
 };
 
-
-
-const buyViaMarket = async () => {
-
-    // let currencyPair;
-
-    // if (currencyPair == "") {
-    //     currencyPair = "BTC/USDT"
-    // }
-
-    const marketOrders = await api.getMarketOrders();
+async function Market(marketOrders) {
 
     if (marketOrders.length === 0) return {
         error: "no_market_orders"
     }
-
+    
     let price;
     let amountToBuy;
 
@@ -75,8 +73,8 @@ const buyViaMarket = async () => {
 
         const marketOrder = marketOrders[i];
 
-        const p = marketOrder.pricePerCoin;
-        const maxAmount = marketOrder.coinAmount;
+        const p = marketOrder.price;
+        const maxAmount = marketOrder.quantity;
         const a = bn.divide(CONFIG.AMOUNT, p, 'coin');
 
         if (bn.isLessThanOrEqualTo(a, maxAmount)) {
@@ -90,24 +88,36 @@ const buyViaMarket = async () => {
     if (!(price && amountToBuy)) return {
         error: "btc_amount_too_small"
     }
-
     try {
-        const marketOrder = await api.postProMarketOrder(amountToBuy);
-        return {
+        const marketOrder = await api.postProMarketOrder('10000');
+        console.log(marketOrder);
+              
+        const summary = {
+            purchase_date: getTodaysDate(),
             purchase_method: "market",
-            purchase_amount: marketOrder.coinAmount,
-            purchase_price: marketOrder.pricePerCoin,
-            purchase_id: marketOrder.id
+            purchase_amount: marketOrder.quantity,
+            purchase_price: marketOrder.price,
+            purchase_id: marketOrder.pair
+    }
+        console.log(summary);
+        db.addSummaryToDatabase(summary);
+        return {
+            summary
         }
 
     } catch (error) {
-        return {
-            error: "failed_market_order",
-            message: error
-        }
+        console.log("failed_market_order");
+        summary.error_market_order = `${result.error}:${result.message || ''}`;
+        result = buyViaInstant();
+        if (result.error) summary.error_instant_order = `${result.error}:${result.message || ''}`;
+    
     }
+}
+
+const buyViaMarket = async () => {
 
     
+ 
 };
 
 const buyViaInstant = async () => {
@@ -151,26 +161,38 @@ module.exports = async (allowMultipeBuyOnDay) => {
 
     if ( !(await checkIfShouldBuyToday(allowMultipeBuyOnDay)) ) return;
 
-    const summary = {
-        summary_date: getTodaysDate()
-    };
+    
+    var summarily;
+    pair = 'BTC/NGNT'
+    const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
 
-    let result = await buyViaMarket();
-    if (result.error) {
-        summary.error_market_order = `${result.error}:${result.message || ''}`;
-        result = await buyViaInstant();
-        if (result.error) summary.error_instant_order = `${result.error}:${result.message || ''}`;
-    }
+    const orderbookSocket = new WebSocket(baseUrl);
+    orderbookSocket.binaryType = 'arraybuffer';
+    console.log('GOT HERE');
 
-    if (result.purchase_method) {
-        summary.purchase_method = result.purchase_method,
-        summary.purchase_amount = result.purchase_amount,
-        summary.purchase_price = result.purchase_price,
-        summary.purchase_id = result.purchase_id
-    }
+    orderbookSocket.addEventListener('open', async () => {
+    console.log('Connected to orderbook WebSocket API');
+    });
 
-    db.addSummaryToDatabase(summary);
+    orderbookSocket.addEventListener('message', ({ data }) => {
+    console.log('Order Book update received');
+    const market = OrderBook.deserializeBinary(data).toObject();
 
-    return summary;
+    const orders = market.asksList;
+    var bestPrice;
+    if (orders.length === 0) {
+        console.log('We are done here');
+    } else {
+        bestPrice = orders.sort((a, b) => {
+        return parseFloat(a.price) - parseFloat(b.price);
+        });
+    }  
+    summarily = Market(bestPrice);
+    orderbookSocket.terminate();
+    
+    });
+    
+
+    return summarily;
 
 };

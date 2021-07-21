@@ -82,7 +82,7 @@ module.exports = {
         } else {
           const bestPrice = orders.sort((a, b) => {
             return parseFloat(a.price) - parseFloat(b.price);
-          })[0];
+          });
 
           callback(bestPrice);
           orderbookSocket.terminate();
@@ -102,7 +102,7 @@ module.exports = {
 
   postProMarketOrder: (quantity) => {
     const query = `
-            mutation postProMarketOrder($pair: CryptocurrencyPair, $quantity: BigDecimal!, $side: OrderSide!) {
+            mutation postProMarketOrder($pair: Pair!, $quantity: BigDecimal!, $side: OrderSide!) {
                 postProMarketOrder(pair: $pair, quantity: $quantity, side: $side){
                     id
                     pair
@@ -125,8 +125,8 @@ module.exports = {
             `;
 
     const variables = {
-      pair: 'btc_usdt',
-      side: 'sell',
+      pair: 'btc_ngnt', 
+      side: 'buy',
       quantity,
     };
 
@@ -137,6 +137,7 @@ module.exports = {
         return Promise.reject();
       })
       .catch((error) => {
+          console.log(error);
         const message =
           error.response &&
           error.response.errors &&
