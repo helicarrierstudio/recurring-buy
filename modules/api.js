@@ -1,186 +1,196 @@
-const graphqlRequest = require('graphql-request');
+const api = require('./api');
+const db = require('./db');
+const bn = require('./big-number');
 const order = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb');
 const OrderBook = order.Orderbook;
 const WebSocket = require('ws');
 
-let secrets = {
-  BUYCOINS_API_PUBLIC: process.env.BUYCOINS_API_PUBLIC,
-  BUYCOINS_API_SECRET: process.env.BUYCOINS_API_SECRET,
+const CONFIG = {
+    AMOUNT: process.env.BUY_AMOUNT,
+    FREQUENCY: process.env.BUY_FREQUENCY,
 };
 
-if (!process.env.BUYCOINS_API_PUBLIC) {
-  secrets = require('../secrets');
+const getTodaysDate = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+
+    return `${year}-${month}-${day}`;
+};
+
+const checkIfShouldBuyToday = async (allowMultipeBuyOnDay) => {
+
+    const today = new Date();
+    const frequency_period = CONFIG.FREQUENCY.split('_')[0];
+
+    let shouldBuyToday = false;
+
+    switch (frequency_period) {
+        case 'DAILY':
+            shouldBuyToday = true;
+            break;
+
+        case 'WEEKLY':
+            const frequency_day = parseInt(CONFIG.FREQUENCY.split('_')[1]);
+            const day = today.getDay();
+            shouldBuyToday = frequency_day === day;
+            break;
+
+        case 'MONTHLY':
+            const frequency_date = parseInt(CONFIG.FREQUENCY.split('_')[1]);
+            const date = today.getDate();
+            shouldBuyToday = frequency_date === date;
+            break;
+    }
+
+    if (!allowMultipeBuyOnDay && shouldBuyToday) {
+        const date = getTodaysDate();
+        const summary = await db.getSummaryByDate(date); 
+
+        shouldBuyToday = !summary;
+    }
+
+    console.log("Should Buy Today:", shouldBuyToday);
+    return shouldBuyToday;
+};
+
+async function Market(marketOrders) {
+
+    if (marketOrders.length === 0) return {
+        error: "no_market_orders"
+    }
+    
+    let price;
+    let amountToBuy;
+
+    for (let i = 0; i < marketOrders.length; i++) {
+
+        const marketOrder = marketOrders[i];
+
+        const p = marketOrder.price;
+        console.log(p)
+        const maxAmount = marketOrder.quantity;
+        const a = bn.divide(CONFIG.AMOUNT, p, 'coin');
+        console.log(a)
+
+        if (bn.isLessThanOrEqualTo(a, maxAmount)) {
+            price = p;
+            amountToBuy = a;
+            console.log('Gotten amount', amountToBuy)
+            break;
+        }
+
+    }
+
+    if (!(price && amountToBuy)) return {
+        error: "btc_amount_too_small"
+    }
+    try {
+        const marketOrder = await api.postProMarketOrder(amountToBuy);
+        console.log(marketOrder);
+              
+        const summary = {
+            purchase_date: getTodaysDate(),
+            purchase_method: "market",
+            purchase_amount: marketOrder.quantity,
+            purchase_price: marketOrder.price,
+            purchase_id: marketOrder.pair
+    }
+        console.log(summary);
+        db.addSummaryToDatabase(summary);
+        return {
+            summary
+        }
+
+    } catch (error) {
+        console.log("failed_market_order");
+        summary.error_market_order = `${result.error}:${result.message || ''}`;
+        result = buyViaInstant();
+        if (result.error) summary.error_instant_order = `${result.error}:${result.message || ''}`;
+    
+    }
 }
 
-const endpoint = 'https://backend.buycoins.tech/api/graphql';
-const authorization =
-  'Basic ' +
-  Buffer.from(
-    secrets.BUYCOINS_API_PUBLIC + ':' + secrets.BUYCOINS_API_SECRET
-  ).toString('base64');
+// const buyViaMarket = async () => {
 
-const graphQLClient = new graphqlRequest.GraphQLClient(endpoint, {
-  headers: {
-    authorization,
-    'Content-Type': 'application/json',
-  },
-});
+    
+ 
+// };
 
-module.exports = {
-  getInstantPrices: () => {
-    const query = `
-            query getPrices($cryptocurrency: Cryptocurrency, $side: OrderSide) {
-                getPrices(cryptocurrency: $cryptocurrency, side: $side) {
-                    id
-                    buyPricePerCoin
-                    minBuy
-                    status
-                    cryptocurrency
-                }
-            }
-        `;
+const buyViaInstant = async () => {
+    
+    const instantPrice = (await api.getInstantPrices())[0];
 
-    const variables = {
-      cryptocurrency: 'bitcoin',
-      side: 'buy',
-    };
-
-    return graphQLClient
-      .request(query, variables)
-      .then((res) => res.getPrices)
-      .catch((error) => {
-        const message =
-          error.response &&
-          error.response.errors &&
-          error.response.errors[0] &&
-          error.response.errors[0].message;
-        console.error(message);
-        return [];
-      });
-  },
-
-  getMarketOrders: (pair = 'BTC/NGNT', callback = nil) => {
-    try {
-      const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
-
-      const orderbookSocket = new WebSocket(baseUrl);
-      orderbookSocket.binaryType = 'arraybuffer';
-      console.log('GOT HERE');
-
-      orderbookSocket.addEventListener('open', () => {
-        console.log('Disconnected from orderbook WebSocket API');
-      });
-
-      orderbookSocket.addEventListener('message', ({ data }) => {
-        console.log('Order Book update received');
-        const market = OrderBook.deserializeBinary(data).toObject();
-        console.log(market);
-
-        const orders = market.asksList;
-        if (orders.length === 0) {
-          callback(null);
-        } else {
-          const bestPrice = orders.sort((a, b) => {
-            return parseFloat(a.price) - parseFloat(b.price);
-          })[0];
-
-          callback(bestPrice);
-          orderbookSocket.terminate();
-        }
-      });
-    } catch (error) {
-      console.log(error);
-      const message =
-        error.response &&
-        error.response.errors &&
-        error.response.errors[0] &&
-        error.response.errors[0].message;
-      console.error(message);
-      return [];
+    if (!instantPrice) return {
+        error: "no_instant_price"
     }
-  },
 
-  postProMarketOrder: (quantity) => {
-    const query = `
-            mutation postProMarketOrder($pair: CryptocurrencyPair, $quantity: BigDecimal!, $side: OrderSide!) {
-                postProMarketOrder(pair: $pair, quantity: $quantity, side: $side){
-                    id
-                    pair
-                    price
-                    side
-                    status
-                    timeInForce
-                    orderType
-                    fees
-                    filled
-                    total
-                    initialBaseQuantity
-                    initialQuoteQuantity
-                    remainingBaseQuantity
-                    remainingQuoteQuantity
-                    meanExecutionPrice
-                    engineMessage
-                }
-            }
-            `;
+    const price = instantPrice.buyPricePerCoin;
+    const minAmount = instantPrice.minBuy;
+    const amountToBuy = bn.divide(CONFIG.AMOUNT, price, 'coin');
 
-    const variables = {
-      pair: 'btc_usdt',
-      side: 'sell',
-      quantity,
-    };
+    if (bn.isLessThanOrEqualTo(amountToBuy, minAmount)) return {
+        error: "btc_amount_too_small"
+    }
 
-    return graphQLClient
-      .request(query, variables)
-      .then((res) => {
-        if (res.postProMarketOrder) return res.postProMarketOrder;
-        return Promise.reject();
-      })
-      .catch((error) => {
-        const message =
-          error.response &&
-          error.response.errors &&
-          error.response.errors[0] &&
-          error.response.errors[0].message;
-        return Promise.reject(message);
-      });
-  },
+    try {
+        const instantOrder = await api.placeInstantOrder(amountToBuy, instantPrice.id);
+        return {
+            purchase_method: "instant",
+            purchase_amount: instantOrder.totalCoinAmount,
+            purchase_price: instantOrder.price.buyPricePerCoin,
+            purchase_id: instantOrder.id
+        }
 
-  placeInstantOrder: (coin_amount, price) => {
-    const query = `
-            mutation buy($cryptocurrency: Cryptocurrency, 
-                         $price: ID!, 
-                         $coin_amount: BigDecimal!) {
-                buy(cryptocurrency: $cryptocurrency, 
-                    price: $price, 
-                    coin_amount: $coin_amount) {
-                    id
-                    createdAt
-                    cryptocurrency
-                    totalCoinAmount
-                    price {
-                        buyPricePerCoin
-                    }
-                }
-            }
-        `;
+    } catch (error) {
+        return {
+            error: "failed_instant_order",
+            message: error
+        }
+    }
 
-    const variables = {
-      cryptocurrency: 'bitcoin',
-      coin_amount,
-      price,
-    };
+};
 
-    return graphQLClient
-      .request(query, variables)
-      .then((res) => res.buy)
-      .catch((error) => {
-        const message =
-          error.response &&
-          error.response.errors &&
-          error.response.errors[0] &&
-          error.response.errors[0].message;
-        return Promise.reject(message);
-      });
-  },
+
+module.exports = async (allowMultipeBuyOnDay) => {
+
+    if (!CONFIG.AMOUNT || !CONFIG.FREQUENCY) return console.error("missing configuration");
+
+    if ( !(await checkIfShouldBuyToday(allowMultipeBuyOnDay)) ) return;
+
+    
+    var summarily;
+    pair = 'BTC/NGNT'
+    const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
+
+    const orderbookSocket = new WebSocket(baseUrl);
+    orderbookSocket.binaryType = 'arraybuffer';
+    console.log('GOT HERE');
+
+    orderbookSocket.addEventListener('open', async () => {
+    console.log('Connected to orderbook WebSocket API');
+    });
+
+    orderbookSocket.addEventListener('message', ({ data }) => {
+    console.log('Order Book update received');
+    const market = OrderBook.deserializeBinary(data).toObject();
+
+    const orders = market.asksList;
+    var bestPrice;
+    if (orders.length === 0) {
+        console.log('We are done here');
+    } else {
+        bestPrice = orders.sort((a, b) => {
+        return parseFloat(a.price) - parseFloat(b.price);
+        });
+    }  
+    summarily = Market(bestPrice);
+    orderbookSocket.terminate();
+    
+    });
+    
+
+    return summarily;
+
 };
