@@ -20,7 +20,7 @@
           "required": true
       },
       "BUY_CURRENCIES": {
-        "description": "What Cryptocurrency pair would you like to trade? (e.g. btc_ngnt)",
+        "description": "What Cryptocurrency would you like to purchase? (e.g. BTC, ETH, etc.)",
           "required": true
       },
       "FAUNA_DB_SECRET": {
