@@ -21,7 +21,7 @@
       },
       "BUY_CURRENCIES": {
         "description": "What Cryptocurrency would you like to purchase? (e.g. BTC, ETH, etc.)",
-          "required": true
+          "required": false
       },
       "FAUNA_DB_SECRET": {
           "description": "Your secret key for your Fauna Database",
