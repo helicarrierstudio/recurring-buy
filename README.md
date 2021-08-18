@@ -46,7 +46,7 @@ The currency pair you want to trade. e.g. `btc_ngnt` to buy btc with ngnt. To se
 
 ### 4. Deploy to Heroku and add environment variables
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/jelilat/recurring-buy)
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/buycoinsafrica/recurring-buy)
 
 When deploying, you'll need to add the environment variables from the previous steps to your new app.
 
