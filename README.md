@@ -17,7 +17,7 @@ This is an open-source project that you can use to spread your investment in Cry
 
 ### 1. Get access to the BuyCoins API
 
-You'll need access to the [BuyCoins API](http://developers.buycoins.africa/) in order to make automatic purchases. To apply for access, send an email to support@buycoins.africa with the email address attached to your BuyCoins and a link to this project.
+You'll need access to the [BuyCoins API](http://developers.buycoins.africa/) in order to make automatic purchases. To apply for access, send an email to support@buycoins.africa with the email address attached to your Buycoins account and a link to this project.
 
 Once you have access, go to your [API Settings](https://buycoins.africa/settings/api) page. Generate and copy your public and secret keys. These keys will be used as the `BUYCOINS_API_PUBLIC` and `BUYCOINS_API_SECRET` environment variables on Heroku.
 
