@@ -42,7 +42,7 @@ Next, you'll need to specify how often you want to buy coins, how much you want 
 2. `BUY_AMOUNT`
 The amount (in Naira) you want to purchase at each frequency.
 3. `BUY_CURRENCIES`
-The currency pair you want to trade. e.g. `btc_ngnt` to buy btc with ngnt. To see all the cryptocurrency pairs supported by Buycoins, you can call the [getPairs](https://developers.buycoins.africa/orderbook-trading/glossary) method.
+The currency pair you want to trade. e.g. `btc_ngnt` to buy btc with ngnt. To see all the cryptocurrency pairs supported by Buycoins, you can use the [getPairs](https://developers.buycoins.africa/orderbook-trading/glossary) method.
 
 ### 4. Deploy to Heroku and add environment variables
 
