@@ -1,10 +1,10 @@
 const api = require('./api');
 const db = require('./db');
-const bn = require('./big-number');
 
 const CONFIG = {
     AMOUNT: process.env.BUY_AMOUNT,
     FREQUENCY: process.env.BUY_FREQUENCY,
+    BUY_CURRENCIES: process.env.BUY_CURRENCIES,
 };
 
 const getTodaysDate = () => {
@@ -54,11 +54,11 @@ const checkIfShouldBuyToday = async (allowMultipleBuyOnDay) => {
     return shouldBuyToday;
 };
 
-const buyViaOrderbook = async function() {
+const buyViaOrderbook = async function(pair) {
     const summary = {};
 
     try {
-        const marketOrder = await api.postProMarketOrder(CONFIG.AMOUNT);
+        const marketOrder = await api.postProMarketOrder(CONFIG.AMOUNT, pair);
         console.log(marketOrder);
 
         switch (marketOrder.status) {
@@ -88,18 +88,30 @@ const buyViaOrderbook = async function() {
 }
 
 
-module.exports = async (allowMultipeBuyOnDay) => {
+module.exports = async (allowMultipleBuyOnDay) => {
 
     if (!CONFIG.AMOUNT || !CONFIG.FREQUENCY) return console.error("missing configuration");
 
-    if ( !(await checkIfShouldBuyToday(allowMultipeBuyOnDay)) ) return;
+    if ( !(await checkIfShouldBuyToday(allowMultipleBuyOnDay)) ) return;
 
-    const summary = await buyViaOrderbook();
-    summary.date = getTodaysDate();
+    let pairs = [];
 
-    try {
-        await db.addSummaryToDatabase(summary);
-    } catch (error) {}
+    if (CONFIG.BUY_CURRENCIES) {
+        CONFIG.BUY_CURRENCIES.split(",").forEach((baseCurrency) => {
+            pairs.push(`${baseCurrency.toLowerCase()}_ngnt`);
+        });
+    } else {
+        pairs.push('btc_ngnt');
+    }
 
-    return summary;
+    console.log(pairs);
+
+    for (let i = 0; i < pairs.length; i++) {
+        const summary = await buyViaOrderbook(pairs[i]);
+        summary.date = getTodaysDate();
+        try {
+            await db.addSummaryToDatabase(summary);
+        } catch (error) {}
+    }
+
 };

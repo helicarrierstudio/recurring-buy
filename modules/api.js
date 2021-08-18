@@ -100,7 +100,7 @@ module.exports = {
     }
   },
 
-  postProMarketOrder: (quantity) => {
+  postProMarketOrder: (quantity, pair) => {
     const query = `
             mutation postProMarketOrder($pair: Pair!, $quantity: BigDecimal!, $side: OrderSide!) {
                 postProMarketOrder(pair: $pair, quantity: $quantity, side: $side){
@@ -125,7 +125,7 @@ module.exports = {
             `;
 
     const variables = {
-      pair: 'btc_ngnt', 
+      pair: pair,
       side: 'buy',
       quantity,
     };
@@ -175,7 +175,7 @@ module.exports = {
       }`;
 
     const variables = {
-      pair: 'btc_ngnt', 
+      pair: 'btc_ngnt',
       side: 'buy',
       status: 'successful',
     };
