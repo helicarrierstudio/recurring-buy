@@ -33,7 +33,7 @@ Under your database security settings, create a new Key with the **admin** role 
 
 ### 3. Decide on your daily/weekly/monthly spend
 
-Next, you'll need to specify how often you want to buy coins, how much you want to spend on each purchase, and the cryptocurrency pair you want to purchase. You do this by setting the following environment variables:
+Next, you'll need to specify how often you want to buy coins, how much you want to spend on each purchase, and the currency you want to purchase. You do this by setting the following environment variables:
 
 1. `BUY_FREQUENCY`
     - `DAILY` - if you want to buy every day
@@ -42,7 +42,7 @@ Next, you'll need to specify how often you want to buy coins, how much you want 
 2. `BUY_AMOUNT`
 The amount (in Naira) you want to purchase at each frequency.
 3. `BUY_CURRENCIES`
-The currency pair you want to trade. e.g. `btc_ngnt` to buy btc with ngnt. To see all the cryptocurrency pairs supported by Buycoins, you can use the [getPairs](https://developers.buycoins.africa/orderbook-trading/glossary) method.
+The currency pair you want to trade. e.g. `BTC` to buy BTC. To see all the cryptocurrency pairs supported by Buycoins, you can use the [getPairs](https://developers.buycoins.africa/orderbook-trading/glossary) method.
 
 ### 4. Deploy to Heroku and add environment variables
 
