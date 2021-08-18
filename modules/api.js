@@ -1,29 +1,34 @@
 const graphqlRequest = require('graphql-request');
+const order = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb');
+const OrderBook = order.Orderbook;
+const WebSocket = require('ws');
 
 let secrets = {
-    BUYCOINS_API_PUBLIC: process.env.BUYCOINS_API_PUBLIC,
-    BUYCOINS_API_SECRET: process.env.BUYCOINS_API_SECRET,
+  BUYCOINS_API_PUBLIC: process.env.BUYCOINS_API_PUBLIC,
+  BUYCOINS_API_SECRET: process.env.BUYCOINS_API_SECRET,
 };
 
 if (!process.env.BUYCOINS_API_PUBLIC) {
-    secrets = require('../secrets');
-} 
+  secrets = require('../secrets');
+}
 
 const endpoint = 'https://backend.buycoins.tech/api/graphql';
-const authorization = 'Basic ' + Buffer.from(secrets.BUYCOINS_API_PUBLIC  + ':' + secrets.BUYCOINS_API_SECRET).toString('base64');
+const authorization =
+  'Basic ' +
+  Buffer.from(
+    secrets.BUYCOINS_API_PUBLIC + ':' + secrets.BUYCOINS_API_SECRET
+  ).toString('base64');
 
 const graphQLClient = new graphqlRequest.GraphQLClient(endpoint, {
-    headers: {
-        authorization,
-        'Content-Type': 'application/json'
-    },
+  headers: {
+    authorization,
+    'Content-Type': 'application/json',
+  },
 });
 
 module.exports = {
-
-    getInstantPrices: () => {
-
-        const query = `
+  getInstantPrices: () => {
+    const query = `
             query getPrices($cryptocurrency: Cryptocurrency, $side: OrderSide) {
                 getPrices(cryptocurrency: $cryptocurrency, side: $side) {
                     id
@@ -34,104 +39,166 @@ module.exports = {
                 }
             }
         `;
-    
-        const variables = {
-            cryptocurrency: "bitcoin",
-            side: "buy"
-        };
-    
-        return graphQLClient
-            .request(query, variables)
-            .then((res) => res.getPrices)
-            .catch((error) => {
-                const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
-                console.error(message);
-                return [];
-            });
-    },
 
-    getMarketOrders: () => {
+    const variables = {
+      cryptocurrency: 'bitcoin',
+      side: 'buy',
+    };
 
-        const query = `
-            query getMarketBook($cryptocurrency: Cryptocurrency) {
-                getMarketBook(cryptocurrency: $cryptocurrency) {
-        
-                    orders(first: 10) {
-                      
-                      nodes {
-                        id
-                        coinAmount
-                        pricePerCoin
-                        side
-    
-                      }
-                    }
-                    
-                    
-                  }
-            }
-        `;
-    
-        const variables = {
-            cryptocurrency: "bitcoin",
+    return graphQLClient
+      .request(query, variables)
+      .then((res) => res.getPrices)
+      .catch((error) => {
+        const message =
+          error.response &&
+          error.response.errors &&
+          error.response.errors[0] &&
+          error.response.errors[0].message;
+        console.error(message);
+        return [];
+      });
+  },
+
+  getMarketOrders: (pair = 'BTC/NGNT', callback = nil) => {
+    try {
+      const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
+
+      const orderbookSocket = new WebSocket(baseUrl);
+      orderbookSocket.binaryType = 'arraybuffer';
+      console.log('GOT HERE');
+
+      orderbookSocket.addEventListener('open', () => {
+        console.log('Disconnected from orderbook WebSocket API');
+      });
+
+      orderbookSocket.addEventListener('message', ({ data }) => {
+        console.log('Order Book update received');
+        const market = OrderBook.deserializeBinary(data).toObject();
+        console.log(market);
+
+        const orders = market.asksList;
+        if (orders.length === 0) {
+          callback(null);
+        } else {
+          const bestPrice = orders.sort((a, b) => {
+            return parseFloat(a.price) - parseFloat(b.price);
+          });
+
+          callback(bestPrice);
+          orderbookSocket.terminate();
         }
-    
-        return graphQLClient
-            .request(query, variables)
-            .then((res) => {
-                const orders = res.getMarketBook.orders.nodes;
-                const sellOrders = orders.filter((o) => o.side === 'sell');
-                sellOrders.sort((a, b) => {
-                    return parseFloat(a.pricePerCoin) - parseFloat(b.pricePerCoin);
-                });
-                return sellOrders; 
-            })
-            .catch((error) => {
-                const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
-                console.error(message);
-                return [];
-            });
-    },
+      });
+    } catch (error) {
+      console.log(error);
+      const message =
+        error.response &&
+        error.response.errors &&
+        error.response.errors[0] &&
+        error.response.errors[0].message;
+      console.error(message);
+      return [];
+    }
+  },
 
-    postMarketOrder: (coinAmount) => {
-
-        const query = `
-            mutation postMarketOrder($cryptocurrency: Cryptocurrency, $orderSide: OrderSide!, $coinAmount: BigDecimal!) {
-                postMarketOrder(cryptocurrency: $cryptocurrency, orderSide: $orderSide, coinAmount: $coinAmount) {
+  postProMarketOrder: (quantity) => {
+    const query = `
+            mutation postProMarketOrder($pair: Pair!, $quantity: BigDecimal!, $side: OrderSide!) {
+                postProMarketOrder(pair: $pair, quantity: $quantity, side: $side){
                     id
-                    createdAt
-                    cryptocurrency
-                    coinAmount
-                    pricePerCoin
-                    priceType
-                    staticPrice
-                    dynamicExchangeRate
+                    pair
+                    price
+                    side
+                    status
+                    timeInForce
+                    orderType
+                    fees
+                    filled
+                    total
+                    initialBaseQuantity
+                    initialQuoteQuantity
+                    remainingBaseQuantity
+                    remainingQuoteQuantity
+                    meanExecutionPrice
+                    engineMessage
                 }
             }
-        `;
-    
-        const variables = {
-            cryptocurrency: "bitcoin",
-            orderSide: "sell",
-            coinAmount,
-        };
-    
-        return graphQLClient
-            .request(query, variables)
-            .then((res) => {
-                if (res.postMarketOrder) return res.postMarketOrder;
-                return Promise.reject();
-            })
-            .catch((error) => {
-                const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
-                return Promise.reject(message);
-            });
+            `;
 
-    },
+    const variables = {
+      pair: 'btc_ngnt', 
+      side: 'buy',
+      quantity,
+    };
 
-    placeInstantOrder: (coin_amount, price) => {
+    return graphQLClient
+      .request(query, variables)
+      .then((res) => {
+        if (res.postProMarketOrder) return res.postProMarketOrder;
+        return Promise.reject();
+      })
+      .catch((error) => {
+          console.log(error);
+        const message =
+          error.response &&
+          error.response.errors &&
+          error.response.errors[0] &&
+          error.response.errors[0].message;
+        return Promise.reject(message);
+      });
+  },
 
-        const query = `
+  getProOrders: () => {
+    const query = `
+    query getProOrders($pair: Pair!, $status: ProOrderStatus!, $side: OrderSide!) {
+    getProOrders(pair: $pair, status: $status, side: $side) {
+          edges {
+            node {
+              id
+              pair
+              price
+              side
+              status
+              timeInForce
+              orderType
+              fees
+              filled
+              total
+              initialBaseQuantity
+              initialQuoteQuantity
+              remainingBaseQuantity
+              remainingQuoteQuantity
+              meanExecutionPrice
+              engineMessage
+            }
+          }
+        }
+      }`;
+
+    const variables = {
+      pair: 'btc_ngnt', 
+      side: 'buy',
+      status: 'successful',
+    };
+
+    return graphQLClient
+      .request(query, variables)
+      .then((res) => {
+        if (res.getProOrders) return res.getProOrders;
+        return Promise.reject();
+      })
+      .catch((error) => {
+          console.log(error);
+        const message =
+          error.response &&
+          error.response.errors &&
+          error.response.errors[0] &&
+          error.response.errors[0].message;
+        return Promise.reject(message);
+      });
+  },
+
+  placeInstantOrder: (coin_amount, price) => {
+    const query = `
             mutation buy($cryptocurrency: Cryptocurrency, 
                          $price: ID!, 
                          $coin_amount: BigDecimal!) {
@@ -148,21 +215,23 @@ module.exports = {
                 }
             }
         `;
-    
-        const variables = {
-            cryptocurrency: "bitcoin",
-            coin_amount,
-            price,
-        };
-    
-        return graphQLClient
-            .request(query, variables)
-            .then((res) => res.buy)
-            .catch((error) => {
-                const message = error.response && error.response.errors && error.response.errors[0] && error.response.errors[0].message;
-                return Promise.reject(message);
-            });
 
-    }
+    const variables = {
+      cryptocurrency: 'bitcoin',
+      coin_amount,
+      price,
+    };
 
+    return graphQLClient
+      .request(query, variables)
+      .then((res) => res.buy)
+      .catch((error) => {
+        const message =
+          error.response &&
+          error.response.errors &&
+          error.response.errors[0] &&
+          error.response.errors[0].message;
+        return Promise.reject(message);
+      });
+  },
 };
