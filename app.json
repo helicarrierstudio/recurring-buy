@@ -19,6 +19,10 @@
           "description": "Your private/secret key for the BuyCoins API",
           "required": true
       },
+      "BUY_CURRENCIES": {
+        "description": "What Cryptocurrency would you like to purchase? (e.g. BTC, ETH, etc.)",
+          "required": false
+      },
       "FAUNA_DB_SECRET": {
           "description": "Your secret key for your Fauna Database",
           "required": true
