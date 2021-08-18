@@ -42,7 +42,7 @@ Next, you'll need to specify how often you want to buy coins, how much you want 
 2. `BUY_AMOUNT`
 The amount (in Naira) you want to purchase at each frequency.
 3. `BUY_CURRENCIES`
-The currencies you want to trade. e.g. `BTC` to buy BTC. You can also buy multiple currencies at a time. e.g. `BTC, ETH, USDT` to buy `BTC`, `ETH`, and `USDT`.
+The currencies you want to trade. e.g. `BTC` to buy BTC. You can also buy multiple currencies at a time. e.g. `BTC,ETH,USDT` to buy `BTC`, `ETH`, and `USDT`.
 
 To see all the cryptocurrency pairs supported by Buycoins, you can use the [getPairs](https://developers.buycoins.africa/orderbook-trading/glossary) method.
 
