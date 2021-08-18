@@ -1,26 +1,24 @@
 const api = require('./api');
 const db = require('./db');
 const bn = require('./big-number');
-const order = require('public-protos-js/proto/orderbook_socket/v1/orderbook_pb');
-const OrderBook = order.Orderbook;
-const WebSocket = require('ws');
 
 const CONFIG = {
     AMOUNT: process.env.BUY_AMOUNT,
     FREQUENCY: process.env.BUY_FREQUENCY,
 };
 
-
 const getTodaysDate = () => {
     const d = new Date();
     const year = d.getFullYear();
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
+    let month = d.getMonth() + 1;
+    if (month < 10) month = `0${month}`;
+    let day = d.getDate();
+    if (day < 10) day = `0${day}`;
 
     return `${year}-${month}-${day}`;
 };
 
-const checkIfShouldBuyToday = async (allowMultipeBuyOnDay) => {
+const checkIfShouldBuyToday = async (allowMultipleBuyOnDay) => {
 
     const today = new Date();
     const frequency_period = CONFIG.FREQUENCY.split('_')[0];
@@ -45,9 +43,9 @@ const checkIfShouldBuyToday = async (allowMultipeBuyOnDay) => {
             break;
     }
 
-    if (!allowMultipeBuyOnDay && shouldBuyToday) {
+    if (!allowMultipleBuyOnDay && shouldBuyToday) {
         const date = getTodaysDate();
-        const summary = await db.getSummaryByDate(date); 
+        const summary = await db.getSummaryByDate(date);
 
         shouldBuyToday = !summary;
     }
@@ -56,99 +54,38 @@ const checkIfShouldBuyToday = async (allowMultipeBuyOnDay) => {
     return shouldBuyToday;
 };
 
-async function Market(marketOrders) {
+const buyViaOrderbook = async function() {
+    const summary = {};
 
-    if (marketOrders.length === 0) return {
-        error: "no_market_orders"
-    }
-    
-    let price;
-    let amountToBuy;
-
-    for (let i = 0; i < marketOrders.length; i++) {
-
-        const marketOrder = marketOrders[i];
-
-        const p = marketOrder.price;
-        const maxAmount = marketOrder.quantity;
-        const a = bn.divide(CONFIG.AMOUNT, p, 'coin');
-        console.log(a)
-
-        if (bn.isLessThanOrEqualTo(a, maxAmount)) {
-            price = p;
-            amountToBuy = a;
-            console.log('Gotten amount', amountToBuy)
-            break;
-        }
-
-    }
-
-    if (!(price && amountToBuy)) return {
-        error: "btc_amount_too_small"
-    }
     try {
         const marketOrder = await api.postProMarketOrder(CONFIG.AMOUNT);
         console.log(marketOrder);
-              
-        const summary = {
-            purchase_date: getTodaysDate(),
-            purchase_method: "market",
-            purchase_amount: amountToBuy,
-            purchase_price: marketOrder.initialQuoteQuantity,
-            purchase_pair: marketOrder.pair
-    }
-        console.log(summary);
-        db.addSummaryToDatabase(summary);
-        return summary;
 
+        switch (marketOrder.status) {
+            case 'successful':
+            case 'pending':
+            case 'in_progress':
+            case 'partially_filled':
+                summary.purchase_method = "market";
+                summary.purchase_amount = marketOrder.initialQuoteQuantity;
+                summary.purchase_price = marketOrder.meanExecutionPrice;
+                summary.purchase_pair = marketOrder.pair;
+                summary.purchase_fees = marketOrder.fees;
+                summary.purchase_status = marketOrder.status;
+                break;
+            case 'failed':
+            case 'cancelled':
+                summary.error = "failed_market_order";
+                summary.messgae = marketOrder.engineMessage;
+                break;
+        }
     } catch (error) {
-        console.log("failed_market_order");
-        summary.error_market_order = `${result.error}:${result.message || ''}`;
-        result = buyViaInstant();
-        if (result.error) summary.error_instant_order = `${result.error}:${result.message || ''}`;
-    
+        summary.error = "failed_market_order";
+        summary.messgae = error;
     }
+
+    return summary;
 }
-
-// const buyViaMarket = async () => {
-
-    
- 
-// };
-
-const buyViaInstant = async () => {
-    
-    const instantPrice = (await api.getInstantPrices())[0];
-
-    if (!instantPrice) return {
-        error: "no_instant_price"
-    }
-
-    const price = instantPrice.buyPricePerCoin;
-    const minAmount = instantPrice.minBuy;
-    const amountToBuy = bn.divide(CONFIG.AMOUNT, price, 'coin');
-
-    if (bn.isLessThanOrEqualTo(amountToBuy, minAmount)) return {
-        error: "btc_amount_too_small"
-    }
-
-    try {
-        const instantOrder = await api.placeInstantOrder(amountToBuy, instantPrice.id);
-        return {
-            purchase_method: "instant",
-            purchase_amount: instantOrder.totalCoinAmount,
-            purchase_price: instantOrder.price.buyPricePerCoin,
-            purchase_id: instantOrder.id
-        }
-
-    } catch (error) {
-        return {
-            error: "failed_instant_order",
-            message: error
-        }
-    }
-
-};
 
 
 module.exports = async (allowMultipeBuyOnDay) => {
@@ -157,37 +94,12 @@ module.exports = async (allowMultipeBuyOnDay) => {
 
     if ( !(await checkIfShouldBuyToday(allowMultipeBuyOnDay)) ) return;
 
-    
-    var summarily;
-    pair = 'BTC/NGNT'
-    const baseUrl = `wss://markets.buycoins.tech/ws?pair=${pair}`;
+    const summary = await buyViaOrderbook();
+    summary.date = getTodaysDate();
 
-    const orderbookSocket = new WebSocket(baseUrl);
-    orderbookSocket.binaryType = 'arraybuffer';
+    try {
+        await db.addSummaryToDatabase(summary);
+    } catch (error) {}
 
-    orderbookSocket.addEventListener('open', async () => {
-    console.log('Connected to orderbook WebSocket API');
-    });
-
-    orderbookSocket.addEventListener('message', ({ data }) => {
-    console.log('Order Book update received');
-    const market = OrderBook.deserializeBinary(data).toObject();
-
-    const orders = market.asksList;
-    var bestPrice;
-    if (orders.length === 0) {
-        console.log('No market orders');
-    } else {
-        bestPrice = orders.sort((a, b) => {
-        return parseFloat(a.price) - parseFloat(b.price);
-        });
-    }  
-    summarily = Market(bestPrice);
-    orderbookSocket.terminate();
-    
-    });
-    
-
-    return summarily;
-
+    return summary;
 };
