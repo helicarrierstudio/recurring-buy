@@ -62,7 +62,7 @@ Finally, go to your Heroku project "Resources" tab and click the Heroku Schedule
 Next, create a new job using the following settings:
 
 - Schedule: `Every day at..` (any time of your choosing)
-- Run Command: `recurringBuy`
+- Run Command: `node bin/recurringBuy.js`
 
 ![](./public/images/heroku-scheduler.png)
 
