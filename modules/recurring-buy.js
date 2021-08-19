@@ -90,6 +90,9 @@ const buyViaOrderbook = async function(pair) {
 
 module.exports = async (allowMultipleBuyOnDay) => {
 
+    console.log("Starting recurringBuy");
+    console.log(CONFIG);
+
     if (!CONFIG.AMOUNT || !CONFIG.FREQUENCY) return console.error("missing configuration");
 
     if ( !(await checkIfShouldBuyToday(allowMultipleBuyOnDay)) ) return;
@@ -104,14 +107,13 @@ module.exports = async (allowMultipleBuyOnDay) => {
         pairs.push('btc_ngnt');
     }
 
-    console.log(pairs);
-
     for (let i = 0; i < pairs.length; i++) {
         const summary = await buyViaOrderbook(pairs[i]);
         summary.date = getTodaysDate();
         try {
             await db.addSummaryToDatabase(summary);
         } catch (error) {}
+        console.log(summary);
     }
 
 };
