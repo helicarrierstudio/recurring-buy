@@ -2,7 +2,7 @@
 
 # BuyCoins Recurring Buy
 
-This is an open-source project which you can use to spread your investment in Bitcoin over a period of time. Make automated purchases of Bitcoin daily, weekly, or monthly!
+This is an open-source project that you can use to spread your investment in Cryptocurrencies over a period of time. Make automated purchases of any Cryptocurrency daily, weekly, or monthly!
 
 [Dollar cost averaging (DCA)](https://en.wikipedia.org/wiki/Dollar_cost_averaging) is an investment strategy that aims to reduce the impact of volatility on large purchases of financial assets such as equities. By dividing the total sum to be invested in the market (e.g., ₦100,000) into equal amounts put into the market at regular intervals (e.g., ₦1,000 per week over 100 weeks), DCA seeks to reduce the risk of incurring a substantial loss resulting from investing the entire lump sum just before a fall in the market.
 
@@ -17,7 +17,7 @@ This is an open-source project which you can use to spread your investment in Bi
 
 ### 1. Get access to the BuyCoins API
 
-You'll need access to the [BuyCoins API](http://developers.buycoins.africa/) in order to make automatic purchases. To apply for access, send an email to support@buycoins.africa with the email address attached to your BuyCoins and a link to this project.
+You'll need access to the [BuyCoins API](http://developers.buycoins.africa/) in order to make automatic purchases. To apply for access, send an email to support@buycoins.africa with the email address attached to your Buycoins account and a link to this project.
 
 Once you have access, go to your [API Settings](https://buycoins.africa/settings/api) page. Generate and copy your public and secret keys. These keys will be used as the `BUYCOINS_API_PUBLIC` and `BUYCOINS_API_SECRET` environment variables on Heroku.
 
@@ -33,7 +33,7 @@ Under your database security settings, create a new Key with the **admin** role 
 
 ### 3. Decide on your daily/weekly/monthly spend
 
-Next, you'll need to specify how often you want to buy Bitcoin, and how much you want to spend on each purchase. You do this by setting the following environment variables:
+Next, you'll need to specify how often you want to buy coins, how much you want to spend on each purchase, and the currencies you want to purchase. You do this by setting the following environment variables:
 
 1. `BUY_FREQUENCY`
     - `DAILY` - if you want to buy every day
@@ -41,7 +41,10 @@ Next, you'll need to specify how often you want to buy Bitcoin, and how much you
     - **MONTHLY_[1-29]** - if you want to buy once a month. e.g. `MONTHLY_5` to buy on the 5th day of each month
 2. `BUY_AMOUNT`
 The amount (in Naira) you want to purchase at each frequency.
+3. `BUY_CURRENCIES`
+The currencies you want to trade. e.g. `BTC` to buy BTC. You can also buy multiple currencies at a time. e.g. `BTC,ETH,USDT` to buy `BTC`, `ETH`, and `USDT`.
 
+To see all the cryptocurrency pairs supported by Buycoins, you can use the [getPairs](https://developers.buycoins.africa/orderbook-trading/glossary) method.
 
 ### 4. Deploy to Heroku and add environment variables
 
