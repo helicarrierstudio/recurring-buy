@@ -1,3 +1,9 @@
+![Use Accrue](https://res.cloudinary.com/rockets-cdn/image/upload/v1629714118/accrue-banner_pfkgji.jpg)
+
+**This Project is now dormant - we recommend you use Accrue for your [Dollar cost averaging (DCA)](https://en.wikipedia.org/wiki/Dollar_cost_averaging) needs!**
+
+---
+
 ![](public/images/icon-152.png)
 
 # BuyCoins Recurring Buy
